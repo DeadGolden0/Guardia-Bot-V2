@@ -1,0 +1,33 @@
+{
+  "name": "guardia-bot-v2",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@discordjs/builders": "^1.9.0",
+    "@discordjs/rest": "^2.4.0",
+    "dayjs": "^1.11.13",
+    "discord.js": "^14.16.3",
+    "dotenv": "^16.4.5",
+    "module-alias": "^2.2.3",
+    "mongoose": "^8.6.4",
+    "node-fetch": "^2.7.0",
+    "picocolors": "^1.1.0"
+  },
+  "_moduleAliases": {
+    "@Root": ".",
+    "@Src": "src/",
+    "@Commands": "src/Commands",
+    "@Events": "src/Events",
+    "@Helpers": "src/Helpers",
+    "@Database": "src/Database",
+    "@Loaders": "src/Loaders",
+    "@Handlers": "src/Handlers"
+  }
+}
