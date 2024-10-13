@@ -9,7 +9,7 @@ const fetch = require("node-fetch");
 async function checkForUpdates() {
   try {
     const repoOwner = 'DeadGolden0';
-    const repoName = 'TonNomDeRepo';
+    const repoName = 'Guardia-Bot-V2';
     const githubUrl = `https://raw.githubusercontent.com/${repoOwner}/${repoName}/main/package.json`;
 
     const response = await fetch(githubUrl);

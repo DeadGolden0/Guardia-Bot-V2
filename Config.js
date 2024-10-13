@@ -19,24 +19,6 @@ module.exports = {
   
   // Guild ID for the Discord server
   GUILD_ID: "856546352133439530",
-  
-  // Channel ID for the staff channel
-  STAFF_CHANNEL_ID: "1294661005070041169",
-  
-  // Channel ID for the role channel
-  ROLE_CHANNEL_ID: "1294432122341163049",
-  
-  // Default messages used in the bot
-  DEFAULT_MESSAGES: {
-    // Message for role request
-    ROLE_REQUEST_MESSAGE: 'Cliquez sur le bouton ci-dessous pour demander un rôle.',
-    
-    // Message when role request is accepted
-    ROLE_ACCEPTED: 'Votre demande de rôle a été acceptée !',
-    
-    // Message when role request is denied
-    ROLE_DENIED: 'Votre demande de rôle a été refusée.',
-  },
 
   PRESENCE: {
     // Whether or not the bot should update its status

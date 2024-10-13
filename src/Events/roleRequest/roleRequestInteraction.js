@@ -1,6 +1,6 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
 const RoleRequest = require('@Database/schemas/RoleRequest');
-const { STAFF_CHANNEL_ID } = require('@Root/Config');
+const { getStaffChannel } = require('@Helpers/getChannels');
 const logger = require('@Helpers/Logger');
 
 module.exports = {
@@ -42,10 +42,10 @@ module.exports = {
           status: 'pending',
         });
 
-        const staffChannel = interaction.guild.channels.cache.get(STAFF_CHANNEL_ID);
+        // Utiliser la fonction getStaffChannel pour récupérer dynamiquement le canal staff
+        const staffChannel = await getStaffChannel(interaction.guild);
         if (!staffChannel) {
-          logger.error('Le canal staff est introuvable.');
-          return interaction.reply({ content: 'Le canal staff est introuvable.', ephemeral: true });
+          return interaction.reply({ content: 'Le canal staff n\'est pas configuré. Veuillez le configurer d\'abord.', ephemeral: true });
         }
 
         // Créer un embed avec les informations du membre qui fait la demande

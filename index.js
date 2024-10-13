@@ -24,21 +24,21 @@ client.commands = new Collection();
  */
 async function init() {
   try {
-    // Vérifier les mises à jour
-    await  checkForUpdates();
+    // Check for updates
+    await checkForUpdates();
 
-    // Initialiser la connexion à MongoDB
+    // Initialize MongoDB connection
     await initializeMongoose();
 
-    // Charger les commandes et les événements
+    // Load commands and events
     loadCommands(client);
     loadEvents(client);
 
-    // Démarrer le bot Discord
+    // Start the Discord bot
     await client.login(DISCORD_TOKEN);
-    logger.log('Bot Discord démarré avec succès.');
+    logger.log('Discord bot started successfully.');
   } catch (error) {
-    logger.error('Erreur lors de l\'initialisation du bot :', error);
+    logger.error('Error during bot initialization:', error);
     process.exit(1);
   }
 } init();

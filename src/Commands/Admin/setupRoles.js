@@ -1,7 +1,7 @@
 const { ButtonStyle, PermissionsBitField, ActionRowBuilder, ButtonBuilder } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const { getRoleChannel } = require('@Helpers/getChannels');
 const { createEmbed } = require('@Helpers/Embed');
-const { ROLE_CHANNEL_ID } = require('@Root/Config');
 const logger = require('@Helpers/Logger');
 
 module.exports = {
@@ -22,13 +22,9 @@ module.exports = {
     logger.log(`Ajout du rôle: ${role.name} avec l'ID: ${role.id}`);
 
     // Récupérer ou fetch le canal des rôles
-    let roleChannel = interaction.guild.channels.cache.get(ROLE_CHANNEL_ID);
+    const roleChannel = await getRoleChannel(interaction.guild);
     if (!roleChannel) {
-      try {
-        roleChannel = await interaction.guild.channels.fetch(ROLE_CHANNEL_ID);
-      } catch (error) {
-        return interaction.reply({ content: 'Le canal des rôles est introuvable ou inaccessible.', ephemeral: true });
-      }
+      return interaction.reply({ content: 'Le canal des rôles n\'est pas configuré. Veuillez le configurer d\'abord.', ephemeral: true });
     }
 
     // Chercher un message existant avec l'embed "🎭 Demandes de rôles"
@@ -90,7 +86,6 @@ module.exports = {
       await interaction.reply({ content: `Le rôle <@&${role.id}> est maintenant disponible dans le canal des rôles.`, ephemeral: true });
     }
 
-    // Supprimer la réponse éphémère après 5 secondes
     setTimeout(async () => {
       await interaction.deleteReply();
     }, 5000);
