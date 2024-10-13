@@ -25,6 +25,7 @@ async function checkForUpdates() {
     // Comparaison des versions
     if (isNewerVersion(localVersion, remoteVersion)) {
       logger.warn(`Une nouvelle version est disponible : ${remoteVersion}. Veuillez mettre à jour !`);
+      logger.warn(`https://github.com/${repoOwner}/${repoName}`);
     } else {
       logger.log('Aucune mise à jour disponible. Vous utilisez la dernière version.');
     }
