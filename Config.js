@@ -6,7 +6,7 @@ module.exports = {
   LOG_LEVEL: "INFO",
 
   // Array of owner IDs
-  OWNER_IDS: ["285148265962405889"],
+  OWNER_IDS: [""],
   
   // Discord bot token from environment variables
   DISCORD_TOKEN: process.env.DISCORD_TOKEN,
@@ -15,10 +15,10 @@ module.exports = {
   MONGODB_URI: process.env.MONGODB_URI,
 
   // Client ID for the Discord bot
-  CLIENT_ID: "1294341854921228379",
+  CLIENT_ID: "",
   
   // Guild ID for the Discord server
-  GUILD_ID: "856546352133439530",
+  GUILD_ID: "",
 
   PRESENCE: {
     // Whether or not the bot should update its status
