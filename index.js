@@ -1,7 +1,7 @@
 require('module-alias/register');
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const { initializeMongoose } = require("@Database/mongoose");
-const { checkForUpdates } = require('@Helpers/versioning');
+const { checkForUpdates } = require('@Helpers/Versioning');
 const loadCommands = require('@Loaders/commandsLoader');
 const loadEvents = require('@Loaders/eventsLoader');
 const { DISCORD_TOKEN } = require('@Root/Config');
