@@ -1,5 +1,5 @@
 const { ModalBuilder, TextInputBuilder, TextInputStyle, ActionRowBuilder } = require('discord.js');
-const { createDenyEmbed, createHistoryEmbed } = require('@Helpers/embed');
+const { createDenyEmbed, createHistoryEmbed } = require('@Helpers/Embed');
 const RoleRequest = require('@Database/schemas/RoleRequest');
 const logger = require('@Helpers/logger');
 
