@@ -1,4 +1,4 @@
-const { createAcceptEmbed, createAcceptHistoryEmbed } = require('@Helpers/embed');
+const { createAcceptEmbed, createAcceptHistoryEmbed } = require('@Helpers/Embed');
 const RoleRequest = require('@Database/schemas/RoleRequest');
 const logger = require('@Helpers/Logger');
 
