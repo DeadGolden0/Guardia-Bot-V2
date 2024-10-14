@@ -1,6 +1,6 @@
 const ServerConfig = require('@Database/schemas/ServerConfig');
 const { SlashCommandBuilder } = require('discord.js');
-const logger = require('@Helpers/logger');
+const logger = require('@Helpers/Logger');
 
 module.exports = {
   data: new SlashCommandBuilder()
