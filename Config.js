@@ -6,7 +6,7 @@ module.exports = {
   LOG_LEVEL: "INFO",
 
   // Array of owner IDs
-  OWNER_IDS: [""],
+  OWNER_IDS: ["285148265962405889"],
   
   // Discord bot token from environment variables
   DISCORD_TOKEN: process.env.DISCORD_TOKEN,
@@ -15,10 +15,10 @@ module.exports = {
   MONGODB_URI: process.env.MONGODB_URI,
 
   // Client ID for the Discord bot
-  CLIENT_ID: "",
+  CLIENT_ID: "1295813901421772810",
   
   // Guild ID for the Discord server
-  GUILD_ID: "",
+  GUILD_ID: "856546352133439530",
 
   PRESENCE: {
     // Whether or not the bot should update its status
@@ -31,6 +31,6 @@ module.exports = {
     TYPE: "WATCHING", 
 
     // Your bot status message
-    MESSAGE: "Surveille {members} membre sur {servers} servers discord",
+    MESSAGE: "Surveille {members} membres sur {servers} serveurs",
   },
 };

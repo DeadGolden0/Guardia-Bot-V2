@@ -31,5 +31,7 @@ module.exports = {
 
   schemas: {
     RoleRequest: require("./schemas/RoleRequest"),
+    ServerConfig: require("./schemas/ServerConfig"),
+    Project: require("./schemas/Project"),
   },
 };
