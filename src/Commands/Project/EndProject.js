@@ -12,12 +12,18 @@ module.exports = {
   async execute(interaction) {
     const leaderId = interaction.user.id;
 
-    // Utiliser le validateur pour vérifier si l'utilisateur est leader du projet
+    // Vérifier si l'utilisateur est leader du projet
     const { project, isLeader } = await isProjectLeader(leaderId);
-    if (!isLeader) { return interaction.reply({ content: Responses.errors.notLeader(interaction.user.tag), ephemeral: true }); }
+    if (!isLeader) { 
+      return interaction.reply({ content: Responses.notLeader, ephemeral: true })
+        .then(() => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000));
+    }
 
     // Vérifier si une confirmation est déjà en cours pour ce projet
-    if (project.confirmationPending) { return interaction.reply({ content: Responses.errors.confirmationPending, ephemeral: true }); }
+    if (project.confirmationPending) { 
+      return interaction.reply({ content: Responses.confirmationPending, ephemeral: true })
+        .then(() => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000)); 
+    }
 
     // Mettre à jour le projet pour indiquer qu'une confirmation est en cours
     project.confirmationPending = true;
@@ -25,14 +31,19 @@ module.exports = {
 
     // Récupérer le channel texte du projet
     const textChannel = interaction.guild.channels.cache.get(project.textChannelId);
-    if (!textChannel) { return interaction.reply({ content: Responses.errors.discutionChannelNotFound, ephemeral: true }); }
+    if (!textChannel) { 
+      return interaction.reply({ content: Responses.simpleError, ephemeral: true })
+        .then(() => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000)); 
+    }
 
-    interaction.reply({ content: Responses.confirmations.endProject(project.groupeNumber), ephemeral: true });
+    // répondre à l'interaction avec un message de confirmation
+    await interaction.reply({ content: Responses.endProject(project.groupeNumber), ephemeral: true })
+      .then(() => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000));
 
     // Créer un embed de confirmation
     const confirmEmbed = new EmbedBuilder()
       .setTitle('❗ Confirmation de la fin du projet')
-      .setDescription(`Êtes-vous sûr de vouloir mettre fin au groupe de projet **n°${project.groupeNumber}** ? **Cette action est irréversible.**`)
+      .setDescription(`Êtes-vous sûr de vouloir mettre fin au groupe de projet **n°${project.groupeNumber}** ?\n\n **Cette action est irréversible.**`)
       .setColor('#FF0000')
       .setTimestamp()
       .setFooter({ text: '🍹 𝓓𝓔𝓐𝓓 - Bot ©', iconURL: interaction.client.user.displayAvatarURL() });
@@ -58,35 +69,22 @@ module.exports = {
     const confirmationMessage = await textChannel.send({ embeds: [confirmEmbed], components: [row] });
 
     // Écouter les interactions sur les boutons
-    const filter = i => i.user.id === leaderId && (i.customId === 'confirmEndProject' || i.customId === 'cancelEndProject');
+    const filter = i => i.user.id === leaderId && ['confirmEndProject', 'cancelEndProject'].includes(i.customId);
     const collector = confirmationMessage.createMessageComponentCollector({ filter, time: 15000 });
 
     collector.on('collect', async i => {
       if (i.customId === 'confirmEndProject') {
-        // Confirmer la suppression du projet
-        await i.update({ content: Responses.success.projectTerminating, components: [], ephemeral: true });
-
         try {
-          // Supprimer le channel texte
-          const textChannel = interaction.guild.channels.cache.get(project.textChannelId);
-          if (textChannel) await textChannel.delete();
+          // Supprimer les canaux et les rôles associés au projet
+          const channels = ['textChannelId', 'infoChannelId', 'voiceChannelId', 'categoryId'].map(id => interaction.guild.channels.cache.get(project[id]));
+          for (const channel of channels) {
+            if (channel) await channel.delete();
+          }
 
-          const infoChannel = interaction.guild.channels.cache.get(project.infoChannelId);
-          if (infoChannel) await infoChannel.delete();
-
-          // Supprimer le channel vocal
-          const voiceChannel = interaction.guild.channels.cache.get(project.voiceChannelId);
-          if (voiceChannel) await voiceChannel.delete();
-
-          // Supprimer les channels et la catégorie
-          const category = interaction.guild.channels.cache.get(project.categoryId);
-          if (category) await category.delete();
-
-          // Supprimer les rôles
-          const role = interaction.guild.roles.cache.get(project.roleId);
-          const leaderRole = interaction.guild.roles.cache.get(project.leaderRoleId);
-          if (role) await role.delete();
-          if (leaderRole) await leaderRole.delete();
+          const roles = ['roleId', 'leaderRoleId'].map(id => interaction.guild.roles.cache.get(project[id]));
+          for (const role of roles) {
+            if (role) await role.delete();
+          }
 
           // Mettre à jour le projet dans MongoDB
           project.status = 'terminated';
@@ -96,10 +94,15 @@ module.exports = {
           logger.log(`[END_PROJECT] Le groupe de projet numéro ${project.groupeNumber} a été supprimé avec succès.`);
         } catch (error) {
           logger.error(`[END_PROJECT] Erreur lors de la suppression du projet ${project.groupeNumber}: ${error.message}`);
-          return interaction.followUp({ content: Responses.errors.projectDeletionError, ephemeral: true });
+          return interaction.followUp({ content: Responses.simpleError, ephemeral: true });
         }
       } else if (i.customId === 'cancelEndProject') {
-        await i.update({ content: Responses.success.projectDeletionCancelled, components: [], ephemeral: true });
+        // Supprimer l'embed initial
+        await confirmationMessage.delete();
+
+        // Envoyer un message éphémère d'annulation
+        await interaction.followUp({ content: Responses.projectDeletionCancelled, ephemeral: true });
+        setTimeout(() => interaction.deleteReply().catch(() => {}), 5000);
 
         project.confirmationPending = false;
         await project.save();
@@ -114,8 +117,14 @@ module.exports = {
         project.confirmationPending = false;
         await project.save();
 
-        confirmationMessage.edit({ content: Responses.errors.confirmationTimeout, components: [] });
         logger.warn(`[END_PROJECT] Temps écoulé pour la confirmation de la suppression du projet ${project.groupeNumber}.`);
+
+        // Supprimer l'embed initial
+        await confirmationMessage.delete();
+
+        // Envoyer un message éphémère de temps écoulé
+        await interaction.followUp({ content: Responses.cancelEndProject, ephemeral: true });
+        setTimeout(() => interaction.deleteReply().catch(() => {}), 5000);
       }
     });
   },

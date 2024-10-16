@@ -20,14 +20,23 @@ module.exports = {
 
     // Utiliser le validateur pour vérifier si l'utilisateur est leader du projet
     const { project, isLeader } = await isProjectLeader(leaderId);
-    if (!isLeader) { return interaction.reply({ content: Responses.errors.notLeader(interaction.user.tag), ephemeral: true });}
+    if (!isLeader) { 
+      return interaction.reply({ content: Responses.notLeader, ephemeral: true })
+        .then(() => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000));
+    }
 
     // Empêcher le leader de se retirer lui-même
-    if (member.id === leaderId) { return interaction.reply({ content: Responses.errors.leaderSelfRemove, ephemeral: true });}
+    if (member.id === leaderId) { 
+      return interaction.reply({ content: Responses.leaderSelfRemove, ephemeral: true })
+        .then(() => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000));
+    }
 
     // Utiliser le validateur pour vérifier si le membre fait bien partie du projet
     const isMember = await isMemberInProject(project._id, member.id);
-    if (!isMember) { return interaction.reply({ content: Responses.errors.memberNotFound(member.tag), ephemeral: true });}
+    if (!isMember) {
+      return interaction.reply({ content: Responses.memberNotFound(member), ephemeral: true })
+        .then(() => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000));
+    }
     
     // Retirer le rôle si présent dans Discord
     const guildMember = await interaction.guild.members.fetch(member.id);
@@ -42,13 +51,16 @@ module.exports = {
 
     // Récupérer le channel de discussion
     const textChannel = interaction.guild.channels.cache.get(project.textChannelId);
-    if (!textChannel) { return interaction.reply({ content: Responses.errors.discutionChannelNotFound, ephemeral: true }); }
+    if (!textChannel) { 
+      return interaction.reply({ content: Responses.simpleError, ephemeral: true })
+        .then(() => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000));
+    }
 
     // Créer un embed pour notifier le retrait du membre
     const embed = new EmbedBuilder()
       .setTitle('👤 Membre retiré du projet')
-      .setDescription(`Le lead projet <@${leaderId}> a retiré <@${member.id}> du groupe de projet numéro **${project.groupeNumber}**.`)
-      .setColor('#FF0000') // Rouge pour suppression
+      .setDescription(`<@${leaderId}> a retiré <@${member.id}> du groupe de projet numéro **${project.groupeNumber}**.`)
+      .setColor('#FF0000')
       .setTimestamp()
       .setFooter({ text: '🍹 𝓓𝓔𝓐𝓓 - Bot ©', iconURL: interaction.client.user.displayAvatarURL() });
 
@@ -57,6 +69,6 @@ module.exports = {
 
     // Confirmation du retrait du membre
     logger.log(`[REMOVE] Le membre ${member.tag} a été retiré du groupe de projet numéro ${project.groupeNumber} avec succès.`);
-    return interaction.reply({ content: Responses.success.memberRemoved(member.tag, project.groupeNumber), ephemeral: true });
+    return interaction.reply({ content: Responses.memberRemoved(member, project.groupeNumber), ephemeral: true });
   },
 };

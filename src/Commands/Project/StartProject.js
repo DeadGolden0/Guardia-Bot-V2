@@ -21,39 +21,47 @@ module.exports = {
     const leaderId = interaction.user.id;
 
     // Vérifier que le numéro de groupe est supérieur à 0
-    if (groupeNumber <= 0) { return interaction.reply({ content: Responses.errors.invalidGroupNumber, ephemeral: true }); }
+    if (groupeNumber <= 0) { 
+      return interaction.reply({ content: Responses.invalidGroupNumber, ephemeral: true })
+        .then(() => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000)); 
+    }
 
     // Utiliser le validateur pour vérifier si l'utilisateur a déjà un projet actif
     const { project: existingUserProject, isLeader } = await isProjectLeader(leaderId);
-    if (isLeader) { return interaction.reply({ content: Responses.errors.alreadyHasProject(existingUserProject.groupeNumber), ephemeral: true }); }
+    if (isLeader) { 
+      return interaction.reply({ content: Responses.alreadyHasProject(existingUserProject.groupeNumber), ephemeral: true })
+        .then(() => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000));
+    }
 
     // Utiliser le validateur pour vérifier si le numéro de groupe est unique
     const isGroupUnique = await isGroupNumberUnique(groupeNumber);
-    if (!isGroupUnique) { return interaction.reply({ content: Responses.errors.groupExists(groupeNumber), ephemeral: true }); }
+    if (!isGroupUnique) { 
+      return interaction.reply({ content: Responses.groupExists(groupeNumber), ephemeral: true })
+        .then(() => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000));
+    }
 
     // Utiliser deferReply pour répondre rapidement à l'interaction et éviter le timeout
     await interaction.reply({ content: 'Création du projet en cours... Veuillez patienter.', ephemeral: true });
 
-    // Créer un rôle spécial pour le leader
-    const leaderRole = await interaction.guild.roles.create({
+    // Créer les rôles (leader et groupe) en parallèle
+    const [leaderRole, groupRole] = await Promise.all([
+      interaction.guild.roles.create({
         name: `Lead Groupe ${groupeNumber}`,
-        color: 'Gold', // Or en hexadécimal
+        color: 'Gold',
         mentionable: true,
         reason: `Rôle leader pour le groupe ${groupeNumber}`,
-    });
+      }),
+      interaction.guild.roles.create({
+        name: `Groupe ${groupeNumber}`,
+        color: 'Blue',
+        mentionable: true,
+        reason: `Rôle pour le groupe ${groupeNumber}`,
+      }),
+    ]);
 
-    // Créer un rôle pour le groupe
-    const role = await interaction.guild.roles.create({
-      name: `Groupe ${groupeNumber}`,
-      color: 'Blue', // Bleu en hexadécimal
-      mentionable: true,
-      reason: `Rôle pour le groupe ${groupeNumber}`,
-    });
-
-    // Ajouter les rôles au leader (l'utilisateur qui a utilisé la commande)
-    const leaderMember = await interaction.guild.members.fetch(interaction.user.id);
-    await leaderMember.roles.add(role);
-    await leaderMember.roles.add(leaderRole);
+    // Ajouter les rôles au leader
+    const leaderMember = await interaction.guild.members.fetch(leaderId);
+    await leaderMember.roles.add([groupRole, leaderRole]);
 
     // Créer une catégorie pour le projet
     const category = await interaction.guild.channels.create({
@@ -65,11 +73,11 @@ module.exports = {
           deny: [PermissionsBitField.Flags.ViewChannel],
         },
         {
-          id: role.id, // Groupe spécifique
+          id: groupRole, // Groupe spécifique
           allow: [PermissionsBitField.Flags.ViewChannel],
         },
         {
-          id: leaderRole.id, // Leader
+          id: leaderRole, // Leader
           allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.ManageChannels],
         },
       ],
@@ -86,12 +94,12 @@ module.exports = {
           deny: [PermissionsBitField.Flags.ViewChannel],
         },
         {
-          id: role.id,
+          id: groupRole,
           allow: [PermissionsBitField.Flags.ViewChannel],
           deny: [PermissionsBitField.Flags.SendMessages], // Interdire d'écrire
         },
         {
-          id: leaderRole.id,
+          id: leaderRole,
           allow: [PermissionsBitField.Flags.ViewChannel],
           deny: [PermissionsBitField.Flags.SendMessages], // Interdire d'écrire
         },
@@ -109,12 +117,12 @@ module.exports = {
           deny: [PermissionsBitField.Flags.ViewChannel],
         },
         {
-          id: role.id,
-          allow: [PermissionsBitField.Flags.ViewChannel],
+          id: groupRole,
+          allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages],
         },
         {
-          id: leaderRole.id,
-          allow: [PermissionsBitField.Flags.ViewChannel],
+          id: leaderRole,
+          allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages],
         },
       ],
     });
@@ -129,11 +137,11 @@ module.exports = {
           deny: [PermissionsBitField.Flags.ViewChannel],
         },
         {
-          id: role.id,
+          id: groupRole,
           allow: [PermissionsBitField.Flags.ViewChannel],
         },
         {
-          id: leaderRole.id,
+          id: leaderRole,
           allow: [PermissionsBitField.Flags.ViewChannel],
         },
       ],
@@ -146,7 +154,7 @@ module.exports = {
     const infoEmbed = createProjectInfoEmbed({
       project: {
         groupeNumber,
-        memberIds: [interaction.user.id],
+        memberIds: [leaderId],
         progress: 0,
         daysUntilFriday,
         techDocsStatus: 'En cours...',
@@ -162,9 +170,9 @@ module.exports = {
     // Enregistrer les informations du projet dans la base de données
     const project = new Project({
       groupeNumber,
-      leaderId: interaction.user.id,
-      memberIds: [interaction.user.id],
-      roleId: role.id,
+      leaderId: leaderId,
+      memberIds: [leaderId],
+      roleId: groupRole.id,
       leaderRoleId: leaderRole.id,
       categoryId: category.id,
       textChannelId: textChannel.id,
@@ -178,6 +186,7 @@ module.exports = {
 
     // Confirmation du projet créé
     logger.log(`[START_PROJECT] Projet démarré avec succès par ${interaction.user.tag}.`);
-    return interaction.editReply({ content: Responses.success.projectCreated(groupeNumber) });
+    return interaction.editReply({ content: Responses.projectCreated(groupeNumber) })
+    .then(() => { setTimeout(() => interaction.deleteReply().catch(() => {}), 5000); });
   },
 };

@@ -1,41 +1,37 @@
 module.exports = {
-  errors: {
-    invalidGroupNumber: `Le numéro de groupe doit être supérieur à 0.`,
-    alreadyHasProject: (groupNumber) => `Vous avez déjà un projet en cours avec le groupe numéro **${groupNumber}**. Vous devez terminer ce projet avant d'en créer un nouveau.`,
-    noProject: (userTag) => `Oops! **${userTag}**, vous n'avez pas de projet actif.`,
-    notLeader: (userTag) => `Oops! **${userTag}**, vous n'êtes pas le leader de ce projet.`,
-    memberNotFound: (memberTag) => `Le membre **${memberTag}** ne fait pas partie de ce projet.`,
-    groupExists: (groupNumber) => `Le groupe de projet numéro **${groupNumber}** existe déjà. Veuillez choisir un autre numéro de groupe.`,
-    groupNotFound: (groupNumber) => `Le groupe de projet numéro **${groupNumber}** est introuvable.`,
-    taskNotFound: (task) => `La tâche **${task}** est introuvable.`,
-    infoChannelNotFound: `Le channel d'information du projet est introuvable.`,
-    infoMessageNotFound: `Le message d'information du projet est introuvable.`,
-    discutionChannelNotFound: `Le channel de discussion du projet est introuvable.`,
-    memberAlreadyInProject: (memberTag) => `**${memberTag}** fait déjà partie de ce projet.`,
-    cannotRemoveLeader: `Vous ne pouvez pas vous retirer vous-même du projet.`,
-    confirmationPending: `Une confirmation est déjà en cours pour ce projet.`,
-    confirmationTimeout: `Temps écoulé pour la confirmation. La suppression du projet est annulée.`,
-    groupNameTaken: `Ce nom de groupe est déjà utilisé.`,
-    leaderSelfRemove: `Vous ne pouvez pas vous retirer vous-même du projet.`,
-    projectDeletionError: `Une erreur s'est produite lors de la suppression du projet. Veuillez réessayer.`,
-    leaderCannotLeave: `Le leader du projet ne peut pas quitter le projet. Utilisez la commande /endproject pour mettre fin au projet.`,
-  },
-  success: {
-    memberAdded: (memberTag, groupNumber) => `Le membre **${memberTag}** a été ajouté au projet numéro **${groupNumber}** avec succès.`,
-    memberRemoved: (memberTag, groupNumber) => `Le membre **${memberTag}** a été retiré du projet numéro **${groupNumber}** avec succès.`,
-    projectCreated: (groupNumber) => `Le projet **numéro ${groupNumber}** a été créé avec succès.`,
-    projectDeleted: (groupNumber) => `Le projet **numéro ${groupNumber}** a été supprimé avec succès.`,
-    taskAssigned: (taskMemberTag, task) => `La tâche de **${taskMemberTag}** a été assignée avec succès : **${task}**.`,
-    projectUpdated: (groupNumber) => `Le projet **numéro ${groupNumber}** a été mis à jour avec succès.`,
-    projectProgressUpdated: (progress) => `L'avancement du projet a été modifié à **${progress}%**.`,
-    taskUpdated: (taskMemberTag, task) => `La tâche de **${taskMemberTag}** a été mise à jour : **${task}**.`,
-    roleCreated: (roleName) => `Le rôle **${roleName}** a été créé avec succès.`,
-    projectTerminating: `Le projet est en cours de suppression...`,
-    projectDeletionCancelled: `La suppression du projet a été annulée.`,
-    LeaveProject: (groupNumber) => `Vous avez quitté le projet numéro **${groupNumber}** avec succès.`,
-  },
-  confirmations: {
-    endProject: (groupNumber) => `Êtes-vous sûr de vouloir mettre fin au groupe de projet **numéro ${groupNumber}** ? Cette action est irréversible.`,
-    cancelEndProject: `La suppression du projet a été annulée.`,
-  },
+  // ----- Project Errors -----
+  alreadyHasProject: (groupNumber) => `Vous avez déjà un projet en cours avec le groupe numéro **${groupNumber}**. Vous devez terminer ce projet avant d'en créer un nouveau.`,
+  groupExists: (groupNumber) => `Le groupe de projet numéro **${groupNumber}** existe déjà. Veuillez choisir un autre numéro de groupe.`,
+  noProject: `Oops! il semblerait que vous n'avez pas de projet actif.`,
+  simpleError: `Une erreur s'est produite. Veuillez réessayer.`,
+  invalidGroupNumber: `Le numéro de groupe doit être supérieur à 0.`,
+  infoChannelNotFound: `Le channel d'information du projet est introuvable.`,
+  infoMessageNotFound: `Le message d'information du projet est introuvable.`,
+  confirmationPending: `Une confirmation est déjà en cours pour ce projet.`,
+  progressInvalid: `Le pourcentage de progression doit être compris entre 0 et 100.`,
+
+  // ----- Member Errors -----
+  alreadyInProject: (memberTag) => `${memberTag} fait déjà partie de ce groupe de projet.`,
+  memberNotFound: (memberTag) => `${memberTag} ne fait pas partie de ce groupe de projet.`,
+  memberAlreadyInProject: (memberTag) => `**${memberTag}** fait déjà partie de ce projet.`,
+  notLeader: `Oops! il semblerait que vous n'êtes pas le leader d'un groupe de projet.`,
+  leaderSelfRemove: `Vous ne pouvez pas vous retirer vous-même du projet.`,
+  leaderCannotLeave: `Le leader du projet ne peut pas quitter le projet. Utilisez la commande /endproject pour mettre fin au projet.`,
+
+  // ----- Project Success -----
+  projectCreated: (groupNumber) => `Le projet **numéro ${groupNumber}** a été créé avec succès.`,
+  projectUpdated: (groupNumber) => `Le projet **numéro ${groupNumber}** a été mis à jour avec succès.`,
+  projectDeletionCancelled: `La suppression du projet a été annulée.`,
+
+  // ----- Member Success -----
+  memberAdded: (memberTag, groupNumber) => `${memberTag} a bien été ajouté au projet numéro **${groupNumber}** avec succès.`,
+  memberRemoved: (memberTag, groupNumber) => `${memberTag} a été retiré du groupe de projet numéro **${groupNumber}** avec succès.`,
+  LeaveProject: (groupNumber) => `Vous avez quitté le groupe de projet numéro **${groupNumber}** avec succès.`,
+
+  // ----- Task Success -----
+  taskUpdated: (taskMemberTag, task) => `La tâche de ${taskMemberTag} a été mise à jour : **${task}**.`,
+
+  // ----- Confirmations -----
+  endProject: (groupNumber) => `Êtes-vous sûr de vouloir mettre fin au groupe de projet **numéro ${groupNumber}** ? Cette action est irréversible.`,
+  cancelEndProject: `Temps écoulé. La suppression du projet a été annulée.`,
 };

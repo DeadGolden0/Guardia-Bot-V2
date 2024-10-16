@@ -25,11 +25,17 @@ module.exports = {
 
     // Utiliser le validateur pour vérifier si l'utilisateur est le leader d'un projet actif
     const { project, isLeader } = await isProjectLeader(leaderId);
-    if (!isLeader) { return interaction.reply({ content: Responses.errors.notLeader(interaction.user.tag), ephemeral: true }); }
+    if (!isLeader) { 
+      return interaction.reply({ content: Responses.notLeader, ephemeral: true })
+        .then(async () => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000)); 
+    }
 
     // Utiliser le validateur pour vérifier si le membre fait partie du projet
     const isMember = await isMemberInProject(project._id, taskMember.id);
-    if (!isMember) { return interaction.reply({ content: Responses.errors.memberNotFound(taskMember.tag), ephemeral: true }); }
+    if (!isMember) { 
+      return interaction.reply({ content: Responses.memberNotFound(taskMember), ephemeral: true })
+        .then(async () => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000));
+    }
 
     // Ajouter ou mettre à jour la tâche dans la liste des tâches
     const existingTaskIndex = project.tasks.findIndex(t => t.member === taskMember.tag);
@@ -55,12 +61,16 @@ module.exports = {
 
     // Envoyer l'embed dans le channel de discussion du projet
     const textChannel = interaction.guild.channels.cache.get(project.textChannelId);
-    if (!textChannel) { return interaction.reply({ content: Responses.errors.discutionChannelNotFound, ephemeral: true }); }
+    if (!textChannel) { 
+      return interaction.reply({ content: Responses.simpleError, ephemeral: true })
+        .then(async () => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000));
+    }
 
     await textChannel.send({ embeds: [taskEmbed] });
 
     // Confirmer la modification des tâches
     logger.log(`[TASKS] ${interaction.user.tag} a assigné la tâche "${task}" à ${taskMember.tag} dans le projet ${project.groupNumber}.`);
-    return interaction.reply({ content: Responses.success.taskAssigned(taskMember.tag, task), ephemeral: true });
+    return interaction.reply({ content: Responses.taskUpdated(taskMember, task), ephemeral: true })
+      .then(async () => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000));
   },
 };

@@ -15,10 +15,16 @@ module.exports = {
 
     // Vérifier si l'utilisateur est membre d'un projet actif
     const { project, isMember } = await isProjectMember(userId);
-    if (!isMember) { return interaction.reply({ content: Responses.errors.noProject(interaction.user.tag), ephemeral: true });}
+    if (!isMember) { 
+      return interaction.reply({ content: Responses.noProject, ephemeral: true })
+        .then(() => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000)); 
+    }
 
     // Empêcher le leader de quitter le projet
-    if (userId === project.leaderId) { return interaction.reply({ content: Responses.errors.leaderCannotLeave , ephemeral: true });}
+    if (userId === project.leaderId) { 
+      return interaction.reply({ content: Responses.leaderCannotLeave , ephemeral: true })
+        .then(() => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000));
+    }
 
     // Retirer le membre de la liste `memberIds`
     project.memberIds = project.memberIds.filter(id => id !== userId);
@@ -26,14 +32,17 @@ module.exports = {
 
     // Retirer le rôle de projet dans Discord
     const guildMember = await interaction.guild.members.fetch(userId);
-    if (guildMember.roles.cache.has(project.roleId)) { await guildMember.roles.remove(project.roleId);}
+    if (guildMember.roles.cache.has(project.roleId)) { await guildMember.roles.remove(project.roleId); }
 
     // Mettre à jour l'embed d'information
     await updateProjectInfoEmbed(project, interaction);
 
     // Récupérer le channel de discussion pour envoyer la notification
     const textChannel = interaction.guild.channels.cache.get(project.textChannelId);
-    if (!textChannel) { return interaction.reply({ content: Responses.errors.discutionChannelNotFound, ephemeral: true }); }
+    if (!textChannel) { 
+      return interaction.reply({ content: Responses.simpleError, ephemeral: true })
+        .then(() => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000));
+    }
 
     // Créer un embed pour notifier le départ du membre
     const embed = new EmbedBuilder()
@@ -47,6 +56,7 @@ module.exports = {
 
     // Confirmation du départ du membre
     logger.log(`[LEAVE_PROJECT] L'utilisateur ${interaction.user.tag} a quitté le projet numéro ${project.groupeNumber}.`);
-    return interaction.reply({ content: Responses.success.LeaveProject(project.groupeNumber), ephemeral: true });
+    return interaction.reply({ content: Responses.LeaveProject(project.groupeNumber), ephemeral: true })
+      .then(() => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000));
   },
 };

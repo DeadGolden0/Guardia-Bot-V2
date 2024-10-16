@@ -23,7 +23,10 @@ module.exports = {
 
     // Utiliser le validateur pour vérifier si l'utilisateur est membre d'un projet actif
     const { project, isMember } = await isProjectMember(memberId);
-    if (!isMember) { return interaction.reply({ content: Responses.errors.noProject(interaction.user.tag), ephemeral: true });}
+    if (!isMember) { 
+      return interaction.reply({ content: Responses.noProject, ephemeral: true })
+        .then(() => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000)); 
+    }
 
     const progress = interaction.options.getInteger('progress');
     const techDocsStatus = interaction.options.getString('techdocs_status');
@@ -31,12 +34,12 @@ module.exports = {
     let isModified = false;
 
     // Vérifier et modifier le pourcentage de progression
-    if (progress !== null) {
-      if (progress < 0 || progress > 100) {
-        return interaction.reply({ content: Responses.errors.progressInvalid, ephemeral: true });
-      }
+    if (progress !== null && progress >= 0 && progress <= 100) {
       project.progress = progress;
       isModified = true;
+    } else if (progress !== null) {
+      return interaction.reply({ content: Responses.progressInvalid, ephemeral: true })
+        .then(() => deleteAfterDelay(interaction));
     }
 
     // Vérifier et modifier le statut des documents techniques
@@ -63,6 +66,8 @@ module.exports = {
 
     // Confirmation de la mise à jour
     logger.log(`[EDIT_PROJECT] Le projet ${project.groupeNumber} a été modifié avec succès par ${interaction.user.tag}.`);
-    return interaction.reply({ content: Responses.success.projectUpdated(project.groupeNumber), ephemeral: true });
+    return interaction.reply({ content: Responses.projectUpdated(project.groupeNumber), ephemeral: true })
+      .then(async () => { setTimeout(() => interaction.deleteReply().catch(() => {}), 5000); 
+    });
   },
 };

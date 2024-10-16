@@ -20,11 +20,19 @@ module.exports = {
 
     // Utiliser le validateur pour vérifier si l'utilisateur est leader d'un projet actif
     const { project, isLeader } = await isProjectLeader(leaderId);
-    if (!isLeader) { return interaction.reply({ content: Responses.errors.noProject(interaction.user.tag), ephemeral: true });}
+    if (!isLeader) { 
+      return interaction.reply({ content: Responses.noProject, ephemeral: true }).then (async () => {
+        setTimeout(() => interaction.deleteReply().catch(() => {}), 5000);
+      });
+    }
 
     // Utiliser le validateur pour vérifier si le membre fait déjà partie du projet
     const isMemberAlreadyInProject = await isMemberInProject(project._id, member.id);
-    if (isMemberAlreadyInProject) { return interaction.reply({ content: Responses.errors.memberNotFound(member.tag), ephemeral: true });}
+    if (isMemberAlreadyInProject) { 
+      return interaction.reply({ content: Responses.alreadyInProject(member), ephemeral: true }).then (async () => {
+        setTimeout(() => interaction.deleteReply().catch(() => {}), 5000);
+      });
+    }
 
     // Ajouter le membre à la liste `memberIds`
     project.memberIds.push(member.id);
@@ -39,7 +47,11 @@ module.exports = {
 
     // Récupérer le channel de discussion
     const textChannel = interaction.guild.channels.cache.get(project.textChannelId);
-    if (!textChannel) { return interaction.reply({ content: Responses.errors.discutionChannelNotFound, ephemeral: true }); }
+    if (!textChannel) { 
+      return interaction.reply({ content: Responses.errors.simpleError, ephemeral: true }).then (async () => {
+        setTimeout(() => interaction.deleteReply().catch(() => {}), 5000);
+      });
+    }
 
     // Envoyer un ghost ping en mentionnant l'utilisateur puis supprimer immédiatement
     const ghostPingMessage = await textChannel.send(`<@${member.id}>`);
@@ -48,7 +60,7 @@ module.exports = {
     // Créer l'embed pour notifier l'ajout du membre
     const embed = new EmbedBuilder()
       .setTitle('👥 Nouveau membre ajouté au projet')
-      .setDescription(`Le lead projet <@${leaderId}> a ajouté <@${member.id}> au groupe de projet numéro **${project.groupeNumber}**.`)
+      .setDescription(`<@${leaderId}> a ajouté <@${member.id}> au groupe de projet numéro **${project.groupeNumber}**.`)
       .setColor('#00FF00')
       .setTimestamp()
       .setFooter({ text: '🍹 𝓓𝓔𝓐𝓓 - Bot ©', iconURL: interaction.client.user.displayAvatarURL() });
@@ -58,6 +70,8 @@ module.exports = {
 
     // Confirmation de l'ajout du membre
     logger.log(`[ADD_PROJECT] Le membre ${member.tag} a été ajouté au groupe de projet numéro ${project.groupeNumber} avec succès.`);
-    return interaction.reply({ content: Responses.success.memberAdded(member.tag, project.groupeNumber), ephemeral: true });
+    return interaction.reply({ content: Responses.memberAdded(member, project.groupeNumber), ephemeral: true }).then (async () => {
+      setTimeout(() => interaction.deleteReply().catch(() => {}), 5000);
+    });
   },
 };
