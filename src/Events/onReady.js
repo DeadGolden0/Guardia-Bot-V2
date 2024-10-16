@@ -1,5 +1,5 @@
 const handlePresence = require("@Handlers/Presence");
-const { PRESENCE } = require("@Root/Config");
+const { PRESENCE } = require("@Config/Config");
 const logger = require('@Helpers/Logger');
 
 module.exports = {

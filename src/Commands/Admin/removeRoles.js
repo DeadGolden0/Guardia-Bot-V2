@@ -1,6 +1,6 @@
 const { PermissionsBitField, ActionRowBuilder } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { ROLE_CHANNEL_ID } = require('@Root/Config');
+const { ROLE_CHANNEL_ID } = require('@Config/Config');
 const logger = require('@Helpers/Logger');
 
 module.exports = {

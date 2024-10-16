@@ -1,6 +1,5 @@
-// database/mongoose.js
 const mongoose = require('mongoose');
-const { MONGODB_URI } = require('@Root/Config');
+const { MONGODB_URI } = require('@Config/Config');
 const logger = require('@Helpers/Logger');
 
 /**
@@ -30,8 +29,8 @@ module.exports = {
   },
 
   schemas: {
+    Project: require("./schemas/Project"),
     RoleRequest: require("./schemas/RoleRequest"),
     ServerConfig: require("./schemas/ServerConfig"),
-    Project: require("./schemas/Project"),
   },
 };

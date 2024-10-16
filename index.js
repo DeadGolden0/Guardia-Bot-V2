@@ -4,7 +4,7 @@ const { initializeMongoose } = require("@Database/mongoose");
 const { checkForUpdates } = require('@Helpers/Versioning');
 const loadCommands = require('@Loaders/commandsLoader');
 const loadEvents = require('@Loaders/eventsLoader');
-const { DISCORD_TOKEN } = require('@Root/Config');
+const { DISCORD_TOKEN } = require('@Config/Config');
 const logger = require('@Helpers/Logger');
 
 // Initialisation du client Discord

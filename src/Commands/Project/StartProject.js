@@ -1,24 +1,11 @@
-const { SlashCommandBuilder } = require('@discordjs/builders');
 const { PermissionsBitField, ChannelType, EmbedBuilder } = require('discord.js');
+const { isProjectLeader, isGroupNumberUnique } = require('@Helpers/Validators');
+const { SlashCommandBuilder } = require('@discordjs/builders');
+const { createProjectInfoEmbed } = require('@Helpers/Embed');
+const { getDaysUntilNextFriday } = require('@Helpers/Utils');
 const Project = require('@Database/schemas/Project');
+const Responses = require('@Config/Responses');
 const logger = require('@Helpers/Logger');
-
-// Fonction pour créer une barre de progression
-function createProgressBar(progress) {
-  const totalBlocks = 22; // Nombre total de blocs dans la barre
-  const filledBlocks = Math.round((progress / 100) * totalBlocks); // Blocs remplis selon le pourcentage
-  const emptyBlocks = totalBlocks - filledBlocks;
-  
-  return '🟩'.repeat(filledBlocks) + '⬜'.repeat(emptyBlocks); // Barres remplies et vides
-}
-
-// Fonction pour calculer le nombre de jours avant le prochain vendredi
-function getDaysUntilNextFriday() {
-  const today = new Date();
-  const dayOfWeek = today.getDay(); // 0 = dimanche, 1 = lundi, ..., 6 = samedi
-  const daysUntilFriday = (5 - dayOfWeek + 7) % 7; // Calcul du nombre de jours restants
-  return daysUntilFriday === 0 ? 7 : daysUntilFriday; // Si aujourd'hui c'est vendredi, retournez 7 jours
-}
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -33,17 +20,19 @@ module.exports = {
     const groupeNumber = interaction.options.getInteger('groupe_number');
     const leaderId = interaction.user.id;
 
-    // Vérifier si cet utilisateur a déjà un projet actif
-    const existingUserProject = await Project.findOne({ leaderId, status: 'active' });
-    if (existingUserProject) {
-      return interaction.reply({ content: `Vous avez déjà un projet en cours avec le groupe numéro **${existingUserProject.groupeNumber}**. Vous devez terminer ce projet avant d'en créer un nouveau.`, ephemeral: true });
-    }
+    // Vérifier que le numéro de groupe est supérieur à 0
+    if (groupeNumber <= 0) { return interaction.reply({ content: Responses.errors.invalidGroupNumber, ephemeral: true }); }
 
-    // Vérifier si le groupe existe déjà avec ce numéro
-    const existingGroup = await Project.findOne({ groupeNumber, status: 'active' });
-    if (existingGroup) {
-      return interaction.reply({ content: `Le groupe numéro **${groupeNumber}** est déjà actif. Veuillez choisir un autre numéro de groupe.`, ephemeral: true });
-    }
+    // Utiliser le validateur pour vérifier si l'utilisateur a déjà un projet actif
+    const { project: existingUserProject, isLeader } = await isProjectLeader(leaderId);
+    if (isLeader) { return interaction.reply({ content: Responses.errors.alreadyHasProject(existingUserProject.groupeNumber), ephemeral: true }); }
+
+    // Utiliser le validateur pour vérifier si le numéro de groupe est unique
+    const isGroupUnique = await isGroupNumberUnique(groupeNumber);
+    if (!isGroupUnique) { return interaction.reply({ content: Responses.errors.groupExists(groupeNumber), ephemeral: true }); }
+
+    // Utiliser deferReply pour répondre rapidement à l'interaction et éviter le timeout
+    await interaction.reply({ content: 'Création du projet en cours... Veuillez patienter.', ephemeral: true });
 
     // Créer un rôle spécial pour le leader
     const leaderRole = await interaction.guild.roles.create({
@@ -51,7 +40,7 @@ module.exports = {
         color: 'Gold', // Or en hexadécimal
         mentionable: true,
         reason: `Rôle leader pour le groupe ${groupeNumber}`,
-      });
+    });
 
     // Créer un rôle pour le groupe
     const role = await interaction.guild.roles.create({
@@ -86,7 +75,7 @@ module.exports = {
       ],
     });
 
-    // **Créer un channel d'information dans cette catégorie**
+    // Créer un channel d'information dans cette catégorie
     const infoChannel = await interaction.guild.channels.create({
       name: `✨┇ɪɴꜰᴏ-ᴘʀᴏᴊᴇᴛ`,
       type: ChannelType.GuildText,
@@ -150,37 +139,22 @@ module.exports = {
       ],
     });
 
-    // Calculer les jours restants avant le vendredi
+    // Calculer les jours restants avant vendredi
     const daysUntilFriday = getDaysUntilNextFriday();
 
-    // **Créer un embed avec les infos du projet**
-    const infoEmbed = new EmbedBuilder()
-      .setTitle(`📊 Informations sur le groupe projet **n°${groupeNumber}**`)
-      .setColor('#2F3136')
-      .addFields(
-        { name: '👥 **Membres du Projet:**', value: `<@${leaderId}>`, inline: false },
-
-        { name: '\u200B', value: '───────────', inline: false }, // Séparateur
-
-        { name: '📈 **Avancement:**', value: `0%\n${createProgressBar(0)}`, inline: false },
-
-        { name: '\u200B', value: '───────────', inline: false }, // Séparateur
-
-        { name: '⏳ **Durée:**', value: `**0** jours`, inline: true },
-        { name: '🕒 **Temps restant:**', value: `**${daysUntilFriday}** jours avant la remise (Vendredi)`, inline: true },
-
-        { name: '\u200B', value: '───────────', inline: false }, // Séparateur
-
-        { name: '📄 **Documents Techniques:**', value: `En cours...`, inline: true },
-        { name: '\u200B', value: '\u200B', inline: true }, // Séparateur
-        { name: '🎞️ **Statut Diaporama:**', value: `En cours...`, inline: true },
-
-        { name: '\u200B', value: '───────────', inline: false }, // Séparateur
-
-        { name: '🛠️ **Tâches Assignées:**', value: 'Aucune tâche assignée', inline: false }
-      )
-      .setFooter({ text: '🍹 𝓓𝓔𝓐𝓓 - Bot ©', iconURL: interaction.client.user.displayAvatarURL() })
-      .setTimestamp();
+    // Créer l'embed d'informations du projet
+    const infoEmbed = createProjectInfoEmbed({
+      project: {
+        groupeNumber,
+        memberIds: [interaction.user.id],
+        progress: 0,
+        daysUntilFriday,
+        techDocsStatus: 'En cours...',
+        presentationStatus: 'En cours...',
+        tasks: []
+      },
+      CLIENT: interaction.client
+    });
 
     // Envoyer l'embed d'info dans le channel d'information
     await infoChannel.send({ embeds: [infoEmbed] });
@@ -196,12 +170,14 @@ module.exports = {
       textChannelId: textChannel.id,
       voiceChannelId: voiceChannel.id,
       infoChannelId: infoChannel.id,
+      daysUntilFriday: daysUntilFriday,
       status: 'active',
     });
 
     await project.save(); // Sauvegarder dans MongoDB
 
     // Confirmation du projet créé
-    return interaction.reply({ content: `Le groupe de projet **numéro ${groupeNumber}** a été créé avec succès avec les channels associés.`, ephemeral: true });
+    logger.log(`[START_PROJECT] Projet démarré avec succès par ${interaction.user.tag}.`);
+    return interaction.editReply({ content: Responses.success.projectCreated(groupeNumber) });
   },
 };

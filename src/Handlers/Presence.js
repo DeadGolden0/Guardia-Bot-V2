@@ -1,5 +1,5 @@
 const { ActivityType } = require('discord.js');
-const { PRESENCE } = require('@Root/Config');
+const { PRESENCE } = require('@Config/Config');
 
 /**
  * Met à jour la présence du bot en fonction des serveurs et des membres.

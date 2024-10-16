@@ -1,5 +1,5 @@
 // Configuration
-const { LOG_LEVEL } = require('@Root/Config');
+const { LOG_LEVEL } = require('@Config/Config');
 
 // Utilitaires
 const pc = require('picocolors');

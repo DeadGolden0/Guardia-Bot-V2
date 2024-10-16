@@ -1,7 +1,7 @@
 require('module-alias/register');
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
-const { DISCORD_TOKEN, CLIENT_ID, GUILD_ID } = require('@Root/Config');
+const { DISCORD_TOKEN, CLIENT_ID, GUILD_ID } = require('@Config/Config');
 const fs = require('fs');
 const path = require('path');
 

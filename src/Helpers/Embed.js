@@ -1,3 +1,4 @@
+const { createProgressBar } = require('@Helpers/Utils');
 const { EmbedBuilder } = require('discord.js');
 
 /**
@@ -98,4 +99,42 @@ function createHistoryEmbed({ roleId, reason, member, staffMember, CLIENT }) {
     .setFooter({ text: '🍹 𝓓𝓔𝓐𝓓 - Bot ©', iconURL: CLIENT.user.displayAvatarURL() });
 }
 
-module.exports = { createEmbed, createAcceptEmbed, createDenyEmbed, createAcceptHistoryEmbed, createHistoryEmbed };
+/**
+ * Creates a project information embed with project data
+ * @param {Object} options The options to configure the embed
+ * @param {Object} options.project The project object with all its information
+ * @param {Object} options.CLIENT The Discord client instance
+ * @returns {EmbedBuilder} The project information embed
+ */
+function createProjectInfoEmbed({ project, CLIENT }) {
+  return new EmbedBuilder()
+    .setTitle(`📊 Informations sur le groupe projet **n°${project.groupeNumber}**`)
+    .setColor('#2F3136')
+    .addFields(
+      { name: '👥 **Membres du Projet:**', value: project.memberIds.map(id => `<@${id}>`).join(', '), inline: false },
+
+      { name: '\u200B', value: '───────────', inline: false }, // Séparateur
+
+      { name: '📈 **Avancement:**', value: `${project.progress}%\n${createProgressBar(project.progress)}`, inline: false },
+
+      { name: '\u200B', value: '───────────', inline: false }, // Séparateur
+
+      { name: '⏳ **Durée:**', value: `**0** jours`, inline: true },
+      { name: '🕒 **Temps restant:**', value: `**${project.daysUntilFriday}** jours avant la remise (Vendredi)`, inline: true },
+
+      { name: '\u200B', value: '───────────', inline: false }, // Séparateur
+
+      { name: '📄 **Documents Techniques:**', value: `${project.techDocsStatus}`, inline: true },
+      { name: '\u200B', value: '\u200B', inline: true }, 
+      { name: '🎞️ **Statut Diaporama:**', value: `${project.presentationStatus}`, inline: true },
+
+      { name: '\u200B', value: '───────────', inline: false }, // Séparateur
+
+      { name: '🛠️ **Tâches Assignées:**', value: project.tasks.map(t => `- **${t.member}**: ${t.task}`).join('\n') || 'Aucune tâche assignée', inline: false }
+    )
+    .setFooter({ text: '🍹 𝓓𝓔𝓐𝓓 - Bot ©', iconURL: CLIENT.user.displayAvatarURL() })
+    .setTimestamp();
+}
+
+
+module.exports = { createEmbed, createAcceptEmbed, createDenyEmbed, createAcceptHistoryEmbed, createHistoryEmbed, createProjectInfoEmbed };

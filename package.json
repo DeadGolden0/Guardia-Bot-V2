@@ -1,6 +1,6 @@
 {
   "name": "guardia-bot-v2",
-  "version": "1.1.0",
+  "version": "1.2.5",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -24,6 +24,7 @@
     "@Root": ".",
     "@Src": "src/",
     "@Commands": "src/Commands",
+    "@Config": "src/Configs",
     "@Events": "src/Events",
     "@Helpers": "src/Helpers",
     "@Database": "src/Database",
