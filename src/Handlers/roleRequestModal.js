@@ -1,6 +1,6 @@
 const { createDenyEmbed, createHistoryEmbed } = require('@Helpers/Embed');
 const RoleRequestSchema = require('@Database/schemas/RoleRequest');
-const { safeReply } = require('@Helpers/Utils');
+const { safeReply } = require('@Helpers/Message');
 const logger = require('@Helpers/Logger');
 
 /**

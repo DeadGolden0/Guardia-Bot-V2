@@ -7,26 +7,27 @@ const { PRESENCE } = require('@Config/Config');
  */
 function updatePresence(client) {
 
-  // Vérifier si la présence est activée dans la configuration
+  // Check if presence is enabled in the configuration
   if (!PRESENCE.ENABLED) return;
 
-  // Initialisation du message de présence
+  // Initialize the presence message
   let message = PRESENCE.MESSAGE;
 
-  // Remplacement des variables dynamiques dans le message
+  // Replace the {servers} variable with the total number of servers
   if (message.includes("{servers}")) {
     message = message.replace("{servers}", client.guilds.cache.size);
   }
 
+  // Replace the {members} variable with the total number of members
   if (message.includes("{members}")) {
     const totalMembers = client.guilds.cache.reduce((sum, guild) => sum + guild.memberCount, 0);
     message = message.replace("{members}", totalMembers);
   }
 
-  // Déterminer le type d'activité (jouer, écouter, etc.)
+  // Get the activity type
   const activityType = getActivityType(PRESENCE.TYPE);
 
-  // Définir la présence du bot
+  // Set the bot's presence
   client.user.setPresence({
     status: PRESENCE.STATUS,
     activities: [
@@ -39,9 +40,9 @@ function updatePresence(client) {
 }
 
 /**
- * Retourne le type d'activité en fonction de la chaîne donnée.
- * @param {string} type - Le type d'activité (PLAYING, LISTENING, etc.).
- * @returns {ActivityType} - Le type d'activité correspondant de Discord.js.
+ * Returns the activity type based on the given string.
+ * @param {string} type - The activity type (PLAYING, LISTENING, etc.).
+ * @returns {ActivityType} - The corresponding activity type from Discord.js.
  */
 function getActivityType(type) {
   switch (type.toUpperCase()) {
@@ -59,12 +60,13 @@ function getActivityType(type) {
 }
 
 /**
- * Met à jour la présence à intervalles réguliers.
- * @param {Client} client - L'instance du client Discord.
+ * Updates the presence at regular intervals.
+ * @param {Client} client - The Discord client instance.
  */
 module.exports = function handlePresence(client) {
-  updatePresence(client); // Met à jour la présence immédiatement
+  // Updates presence on startup
+  updatePresence(client);
 
-  // Met à jour la présence toutes les 10 minutes
+  // Updates presence every 10 minutes
   setInterval(() => updatePresence(client), 10 * 60 * 1000); 
 };

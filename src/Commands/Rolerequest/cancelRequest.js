@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { safeFollowUp } = require('@Helpers/Utils');
+const { safeFollowUp } = require('@Helpers/Message');
 
 /**
  * Cancels a pending role request for the user.

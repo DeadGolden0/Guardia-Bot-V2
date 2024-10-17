@@ -1,5 +1,4 @@
 const logger = require('@Helpers/Logger');
-const cooldowns = new Map();
 
 /**
  * Handles the execution of commands, with permission checks and cooldowns

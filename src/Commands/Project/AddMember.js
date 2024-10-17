@@ -1,10 +1,10 @@
 const { isProjectLeader, isMemberInProject } = require('@Helpers/Validators');
 const { updateProjectInfoEmbed } = require('@Helpers/updateEmbed');
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const { safeFollowUp } = require('@Helpers/Message');
 const { EmbedBuilder } = require('discord.js');
 const Responses = require('@Config/Responses');
 const logger = require('@Helpers/Logger');
-const { safeFollowUp } = require('@Helpers/Utils');
 
 /**
  * Adds a member to an existing project, assigns the project role, and updates the project info embed.

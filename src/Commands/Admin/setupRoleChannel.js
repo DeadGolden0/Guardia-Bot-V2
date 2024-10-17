@@ -1,6 +1,6 @@
 const { PermissionsBitField, SlashCommandBuilder } = require('discord.js');
 const ServerConfig = require('@Database/schemas/ServerConfig');
-const { safeFollowUp } = require('@Helpers/Utils');
+const { safeFollowUp } = require('@Helpers/Message');
 const logger = require('@Helpers/Logger');
 
 /**

@@ -1,7 +1,7 @@
 const { PermissionsBitField, ActionRowBuilder } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { getRoleChannel } = require('@Helpers/getChannels');
-const { safeFollowUp } = require('@Helpers/Utils');
+const { safeFollowUp } = require('@Helpers/Message');
 const logger = require('@Helpers/Logger');
 
 /**

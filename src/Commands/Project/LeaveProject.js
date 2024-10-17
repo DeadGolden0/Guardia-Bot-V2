@@ -1,10 +1,10 @@
 const { updateProjectInfoEmbed } = require('@Helpers/updateEmbed');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { isProjectMember } = require('@Helpers/Validators');
+const { safeFollowUp } = require('@Helpers/Message');
 const Responses = require('@Config/Responses');
 const { EmbedBuilder } = require('discord.js');
 const logger = require('@Helpers/Logger');
-const { safeFollowUp } = require('@Helpers/Utils');
 
 /**
  * Allows a project member to leave the current project, updates the project info embed, and logs the action.

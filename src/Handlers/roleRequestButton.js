@@ -2,7 +2,7 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, ModalBuilder
 const { createDenyEmbed, createHistoryEmbed, createAcceptEmbed, createAcceptHistoryEmbed } = require('@Helpers/Embed');
 const RoleRequestSchema = require('@Database/schemas/RoleRequest');
 const { getStaffChannel } = require('@Helpers/getChannels');
-const { safeReply } = require('@Helpers/Utils');
+const { safeReply } = require('@Helpers/Message');
 const logger = require('@Helpers/Logger');
 
 /**

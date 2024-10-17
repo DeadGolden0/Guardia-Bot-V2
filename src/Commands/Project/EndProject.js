@@ -1,9 +1,9 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { isProjectLeader } = require('@Helpers/Validators');
+const { safeFollowUp } = require('@Helpers/Message');
 const Responses = require('@Config/Responses');
 const logger = require('@Helpers/Logger');
-const { safeFollowUp } = require('@Helpers/Utils');
 
 /**
  * Ends the project and sends a confirmation request to the leader.

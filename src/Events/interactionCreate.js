@@ -3,7 +3,7 @@ const { handleDenyModal  } = require('@Handlers/roleRequestModal');
 const { handleEndProject  } = require('@Handlers/projectButton');
 const commandExecutor = require('@Handlers/commandExecutor');
 const { InteractionType } = require('discord.js');
-const { safeReply } = require('@Helpers/Utils');
+const { safeReply } = require('@Helpers/Message');
 const logger = require('@Helpers/Logger');
 
 /**

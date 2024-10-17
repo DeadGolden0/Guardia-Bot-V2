@@ -1,10 +1,10 @@
 const { isProjectLeader, isMemberInProject } = require('@Helpers/Validators');
 const { updateProjectInfoEmbed } = require('@Helpers/updateEmbed');
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const { safeFollowUp } = require('@Helpers/Message');
 const { EmbedBuilder } = require('discord.js');
 const Responses = require('@Config/Responses');
 const logger = require('@Helpers/Logger');
-const { safeFollowUp } = require('@Helpers/Utils');
 
 /**
  * Edits the tasks assigned to project members. Only the project leader can assign tasks.

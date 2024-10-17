@@ -1,9 +1,9 @@
 const { updateProjectInfoEmbed } = require('@Helpers/updateEmbed');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { isProjectMember } = require('@Helpers/Validators');
+const { safeFollowUp } = require('@Helpers/Message');
 const Responses = require('@Config/Responses');
 const logger = require('@Helpers/Logger');
-const { safeFollowUp } = require('@Helpers/Utils');
 
 /**
  * Edits the project's progress, technical document status, and presentation status, and updates the project info embed.

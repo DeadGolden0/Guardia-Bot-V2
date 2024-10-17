@@ -1,10 +1,10 @@
 const { isProjectLeader, isMemberInProject } = require('@Helpers/Validators');
 const { updateProjectInfoEmbed } = require('@Helpers/updateEmbed');
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const { safeFollowUp } = require('@Helpers/Message');
 const { EmbedBuilder } = require('discord.js');
 const Responses = require('@Config/Responses');
 const logger = require('@Helpers/Logger');
-const { safeFollowUp } = require('@Helpers/Utils');
 
 /**
  * Removes a member from the current project if the leader requests it, updates the project embed, and logs the action.
@@ -14,7 +14,7 @@ const { safeFollowUp } = require('@Helpers/Utils');
  */
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('removemember')
+    .setName('kickmember')
     .setDescription('Retirer un membre du projet actuel. (Lead groupe uniquement)')
     .addUserOption(option => 
       option.setName('member')
