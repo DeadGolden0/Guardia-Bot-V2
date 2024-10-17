@@ -1,4 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const { PermissionsBitField } = require('discord.js');
 
 /**
  * Commande /ping pour tester la réactivité du bot
@@ -8,9 +9,10 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('ping')
-    .setDescription('Répond avec Pong!'),
+    .setDescription('Répond avec Pong!')
+    .setDefaultMemberPermissions(PermissionsBitField.Flags.Administrator),
   
   async execute(interaction) {
-    await interaction.reply('Pong!');
+    await interaction.followUp(`🏓 Pong : \`${Math.floor(interaction.client.ws.ping)}ms\``);
   },
 };

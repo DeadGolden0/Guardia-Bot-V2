@@ -2,11 +2,17 @@ const { PermissionsBitField, ChannelType, EmbedBuilder } = require('discord.js')
 const { isProjectLeader, isGroupNumberUnique } = require('@Helpers/Validators');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { createProjectInfoEmbed } = require('@Helpers/Embed');
-const { getDaysUntilNextFriday } = require('@Helpers/Utils');
+const { getDaysUntilNextFriday, safeFollowUp } = require('@Helpers/Utils');
 const Project = require('@Database/schemas/Project');
 const Responses = require('@Config/Responses');
 const logger = require('@Helpers/Logger');
 
+/**
+ * Starts a new project with a unique group number and creates the necessary channels and roles.
+ * 
+ * @param {import('discord.js').Interaction} interaction - The interaction object.
+ * @returns {Promise<void>}
+ */
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('startproject')
@@ -20,30 +26,24 @@ module.exports = {
     const groupeNumber = interaction.options.getInteger('groupe_number');
     const leaderId = interaction.user.id;
 
-    // Vérifier que le numéro de groupe est supérieur à 0
-    if (groupeNumber <= 0) { 
-      return interaction.reply({ content: Responses.invalidGroupNumber, ephemeral: true })
-        .then(() => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000)); 
+    // Check that the group number is greater than 0
+    if (groupeNumber <= 0) {
+      return safeFollowUp(interaction, { content: Responses.invalidGroupNumber });
     }
 
-    // Utiliser le validateur pour vérifier si l'utilisateur a déjà un projet actif
+    // Check if the user is already a project leader
     const { project: existingUserProject, isLeader } = await isProjectLeader(leaderId);
-    if (isLeader) { 
-      return interaction.reply({ content: Responses.alreadyHasProject(existingUserProject.groupeNumber), ephemeral: true })
-        .then(() => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000));
+    if (isLeader) {
+      return safeFollowUp(interaction, { content: Responses.alreadyHasProject(existingUserProject.groupeNumber) });
     }
 
-    // Utiliser le validateur pour vérifier si le numéro de groupe est unique
+    // Check if the group number is unique
     const isGroupUnique = await isGroupNumberUnique(groupeNumber);
-    if (!isGroupUnique) { 
-      return interaction.reply({ content: Responses.groupExists(groupeNumber), ephemeral: true })
-        .then(() => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000));
+    if (!isGroupUnique) {
+      return safeFollowUp(interaction, { content: Responses.groupExists(groupeNumber) });
     }
 
-    // Utiliser deferReply pour répondre rapidement à l'interaction et éviter le timeout
-    await interaction.reply({ content: 'Création du projet en cours... Veuillez patienter.', ephemeral: true });
-
-    // Créer les rôles (leader et groupe) en parallèle
+    // Create roles (leader and group)
     const [leaderRole, groupRole] = await Promise.all([
       interaction.guild.roles.create({
         name: `Lead Groupe ${groupeNumber}`,
@@ -59,11 +59,11 @@ module.exports = {
       }),
     ]);
 
-    // Ajouter les rôles au leader
+    // Add roles to the leader
     const leaderMember = await interaction.guild.members.fetch(leaderId);
     await leaderMember.roles.add([groupRole, leaderRole]);
 
-    // Créer une catégorie pour le projet
+    // Create a category for the project
     const category = await interaction.guild.channels.create({
       name: `⭐ | Groupe ${groupeNumber}`,
       type: ChannelType.GuildCategory,
@@ -73,7 +73,7 @@ module.exports = {
           deny: [PermissionsBitField.Flags.ViewChannel],
         },
         {
-          id: groupRole, // Groupe spécifique
+          id: groupRole, // Groupe
           allow: [PermissionsBitField.Flags.ViewChannel],
         },
         {
@@ -83,74 +83,44 @@ module.exports = {
       ],
     });
 
-    // Créer un channel d'information dans cette catégorie
-    const infoChannel = await interaction.guild.channels.create({
-      name: `✨┇ɪɴꜰᴏ-ᴘʀᴏᴊᴇᴛ`,
-      type: ChannelType.GuildText,
-      parent: category.id,
-      permissionOverwrites: [
-        {
-          id: interaction.guild.id,
-          deny: [PermissionsBitField.Flags.ViewChannel],
-        },
-        {
-          id: groupRole,
-          allow: [PermissionsBitField.Flags.ViewChannel],
-          deny: [PermissionsBitField.Flags.SendMessages], // Interdire d'écrire
-        },
-        {
-          id: leaderRole,
-          allow: [PermissionsBitField.Flags.ViewChannel],
-          deny: [PermissionsBitField.Flags.SendMessages], // Interdire d'écrire
-        },
-      ],
-    });
+    // Create channels in the project category
+    const [infoChannel, textChannel, voiceChannel] = await Promise.all([
+      interaction.guild.channels.create({
+        name: `✨┇ɪɴꜰᴏ-ᴘʀᴏᴊᴇᴛ`,
+        type: ChannelType.GuildText,
+        parent: category.id,
+        permissionOverwrites: [
+          { id: interaction.guild.id, deny: [PermissionsBitField.Flags.ViewChannel] },
+          { id: groupRole, allow: [PermissionsBitField.Flags.ViewChannel], deny: [PermissionsBitField.Flags.SendMessages] },
+          { id: leaderRole, allow: [PermissionsBitField.Flags.ViewChannel], deny: [PermissionsBitField.Flags.SendMessages] },
+        ],
+      }),
+      interaction.guild.channels.create({
+        name: `💬┇ᴅɪꜱᴄᴜꜱꜱɪᴏɴ`,
+        type: ChannelType.GuildText,
+        parent: category.id,
+        permissionOverwrites: [
+          { id: interaction.guild.id, deny: [PermissionsBitField.Flags.ViewChannel] },
+          { id: groupRole, allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages] },
+          { id: leaderRole, allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages] },
+        ],
+      }),
+      interaction.guild.channels.create({
+        name: `🍹 ● ᴠᴏᴄᴀʟ`,
+        type: ChannelType.GuildVoice,
+        parent: category.id,
+        permissionOverwrites: [
+          { id: interaction.guild.id, deny: [PermissionsBitField.Flags.ViewChannel] },
+          { id: groupRole, allow: [PermissionsBitField.Flags.ViewChannel] },
+          { id: leaderRole, allow: [PermissionsBitField.Flags.ViewChannel] },
+        ],
+      }),
+    ]);
 
-    // Créer un channel texte et vocal dans cette catégorie
-    const textChannel = await interaction.guild.channels.create({
-      name: `💬┇ᴅɪꜱᴄᴜꜱꜱɪᴏɴ`,
-      type: ChannelType.GuildText,
-      parent: category.id,
-      permissionOverwrites: [
-        {
-          id: interaction.guild.id,
-          deny: [PermissionsBitField.Flags.ViewChannel],
-        },
-        {
-          id: groupRole,
-          allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages],
-        },
-        {
-          id: leaderRole,
-          allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages],
-        },
-      ],
-    });
-
-    const voiceChannel = await interaction.guild.channels.create({
-      name: `🍹 ● ᴠᴏᴄᴀʟ`,
-      type: ChannelType.GuildVoice,
-      parent: category.id,
-      permissionOverwrites: [
-        {
-          id: interaction.guild.id,
-          deny: [PermissionsBitField.Flags.ViewChannel],
-        },
-        {
-          id: groupRole,
-          allow: [PermissionsBitField.Flags.ViewChannel],
-        },
-        {
-          id: leaderRole,
-          allow: [PermissionsBitField.Flags.ViewChannel],
-        },
-      ],
-    });
-
-    // Calculer les jours restants avant vendredi
+    // Calculate the remaining days until Friday
     const daysUntilFriday = getDaysUntilNextFriday();
 
-    // Créer l'embed d'informations du projet
+    // Create the project information embed
     const infoEmbed = createProjectInfoEmbed({
       project: {
         groupeNumber,
@@ -164,10 +134,10 @@ module.exports = {
       CLIENT: interaction.client
     });
 
-    // Envoyer l'embed d'info dans le channel d'information
+    // Send the info embed to the info channel
     await infoChannel.send({ embeds: [infoEmbed] });
 
-    // Enregistrer les informations du projet dans la base de données
+    // Save project information to the database
     const project = new Project({
       groupeNumber,
       leaderId: leaderId,
@@ -182,11 +152,11 @@ module.exports = {
       status: 'active',
     });
 
-    await project.save(); // Sauvegarder dans MongoDB
+    // Save to MongoDB
+    await project.save();
 
-    // Confirmation du projet créé
+    // Confirmation of the created project
     logger.log(`[START_PROJECT] Projet démarré avec succès par ${interaction.user.tag}.`);
-    return interaction.editReply({ content: Responses.projectCreated(groupeNumber) })
-    .then(() => { setTimeout(() => interaction.deleteReply().catch(() => {}), 5000); });
+    return safeFollowUp(interaction, { content: Responses.projectCreated(groupeNumber) });
   },
 };

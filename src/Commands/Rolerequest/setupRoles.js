@@ -1,73 +1,90 @@
 const { ButtonStyle, PermissionsBitField, ActionRowBuilder, ButtonBuilder } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { getRoleChannel } = require('@Helpers/getChannels');
+const { safeFollowUp } = require('@Helpers/Utils');
 const { createEmbed } = require('@Helpers/Embed');
 const logger = require('@Helpers/Logger');
 
+/**
+ * Sets up the roles available for users to request.
+ * 
+ * @param {import('discord.js').CommandInteraction} interaction - The command interaction object.
+ * @returns {Promise<void>}
+ * 
+ * @example
+ * // Example usage within a Discord server
+ * /setuproles role:@Role
+ * 
+ * @description
+ * This command allows administrators to configure the roles that users can request in a Discord server. 
+ * It adds buttons in a message, which users can click to request a role. If a message with the role request 
+ * buttons already exists, the command updates the message with the new role button. The response is 
+ * ephemeral and will automatically be deleted after a short delay using the safeFollowUp function.
+ */
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('setuproles')
     .setDescription('Configurer les rôles disponibles pour les utilisateurs')
+    .setDefaultMemberPermissions(PermissionsBitField.Flags.Administrator)
     .addRoleOption(option =>
       option.setName('role')
         .setDescription('Rôle à ajouter')
         .setRequired(true)),
 
   async execute(interaction) {
-    if (!interaction.member.permissions.has(PermissionsBitField.Flags.Administrator)) {
-      return interaction.reply({ content: 'Vous n\'avez pas la permission d\'utiliser cette commande.', ephemeral: true });
-    }
-
     const role = interaction.options.getRole('role');
-    logger.log(`Ajout du rôle: ${role.name} avec l'ID: ${role.id}`);
 
-    // Récupérer ou fetch le canal des rôles
+    // Fetch or find the role request channel
     const roleChannel = await getRoleChannel(interaction.guild);
     if (!roleChannel) {
-      return interaction.reply({ content: 'Le canal des rôles n\'est pas configuré. Veuillez le configurer d\'abord.', ephemeral: true });
+      return safeFollowUp(interaction, { content: 'Le canal des rôles n\'est pas configuré. Veuillez le configurer d\'abord.' });
     }
 
-    // Chercher un message existant avec l'embed "🎭 Demandes de rôles"
+    // Look for an existing message with the "🎭 Demandes de rôles" embed
     const messages = await roleChannel.messages.fetch({ limit: 10 });
     const existingMessage = messages.find(msg => 
       msg.embeds.length > 0 && msg.embeds[0].title === '🎭 Demandes de rôles'
     );
 
-    const customId = `Request-${role.id}`; // CustomId basé uniquement sur l'ID du rôle
+    const customId = `ROLE_REQUEST-${role.id}`;
 
-    // Créer un nouveau bouton pour la demande de rôle
+    // Create a new button for the role request
     const newButton = new ButtonBuilder()
       .setLabel(`${role.name}`)
       .setStyle(ButtonStyle.Primary)
       .setCustomId(customId);
 
-    // Si un embed existe déjà, vérifier si le bouton existe déjà avant de l'ajouter
+    // If the embed already exists, check if the button is already present
     if (existingMessage) {
       const existingEmbed = existingMessage.embeds[0];
       let components = existingMessage.components.map(component => ActionRowBuilder.from(component));
 
-      // Vérifier si le bouton pour ce rôle existe déjà
+      // Check if the button for this role already exists
       const buttonExists = components.some(row => 
         row.components.some(button => button.data.custom_id === customId)
       );
 
       if (buttonExists) {
-        return interaction.reply({ content: `Le bouton pour le rôle <@&${role.id}> existe déjà dans l'embed.`, ephemeral: true });
+        return safeFollowUp(interaction, { content: `Le bouton pour le rôle <@&${role.id}> existe déjà dans l'embed.` });
       }
 
-      // Si le dernier ActionRow est plein (5 boutons), créer un nouveau ActionRow
+      // If the last ActionRow is full (5 buttons), create a new ActionRow
       if (components.length === 0 || components[components.length - 1].components.length >= 5) {
         components.push(new ActionRowBuilder().addComponents(newButton));
       } else {
         components[components.length - 1].addComponents(newButton);
       }
 
-      // Mettre à jour le message existant avec le nouveau bouton
+      // Update the existing message with the new button
       await existingMessage.edit({ embeds: [existingEmbed], components });
+
+      // Log the action and reply to the user
       logger.log(`Le bouton pour le rôle ${role.name} a été ajouté à l'embed existant.`);
-      await interaction.reply({ content: `Le bouton pour le rôle <@&${role.id}> a été ajouté à l'embed existant.`, ephemeral: true });
+      await safeFollowUp(interaction, { content: `Le bouton pour le rôle <@&${role.id}> a été ajouté à l'embed existant.` });
+
     } else {
-      // Sinon, créer un nouvel embed et ajouter le premier bouton
+
+      // Otherwise, create a new embed and add the first button
       const roleEmbed = createEmbed({
         TITLE: '🎭 Demandes de rôles',
         DESC: 'Cliquez sur les boutons ci-dessous pour demander un rôle spécifique.',
@@ -82,12 +99,9 @@ module.exports = {
         components
       });
 
+      // Log the action and reply to the user
       logger.log(`Le rôle ${role.name} est maintenant disponible dans le canal des rôles.`);
-      await interaction.reply({ content: `Le rôle <@&${role.id}> est maintenant disponible dans le canal des rôles.`, ephemeral: true });
+      await safeFollowUp(interaction, { content: `Le rôle <@&${role.id}> est maintenant disponible dans le canal des rôles.` });
     }
-
-    setTimeout(async () => {
-      await interaction.deleteReply();
-    }, 5000);
   },
 };

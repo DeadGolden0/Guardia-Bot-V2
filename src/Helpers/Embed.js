@@ -60,44 +60,63 @@ function createDenyEmbed({ roleName, reason, CLIENT }) {
 }
 
 /**
- * Creates an embed for role acceptance history
+ * Creates an enhanced embed for role acceptance history with separators and a modern design
  * @param {Object} options The options to configure the history embed
- * @param {string} options.roleId The name of the role
+ * @param {string} options.roleId The ID of the role
  * @param {Object} options.member The user who requested the role
  * @param {Object} options.staffMember The staff member who handled the request
  * @param {Object} options.CLIENT The Discord client instance
- * @returns {EmbedBuilder} The history embed
+ * @returns {EmbedBuilder} The acceptance history embed
  */
 function createAcceptHistoryEmbed({ roleId, member, staffMember, CLIENT }) {
   return new EmbedBuilder()
-    .setTitle('📜 Historique de demande de rôle (Acceptée)')
-    .setDescription(`La demande de <@${member.id}> pour le rôle <@&${roleId}> a été **acceptée** par <@${staffMember.id}>.`)
-    .setColor('#00ff00') // Couleur verte pour acceptation
-    .setTimestamp()
-    .setFooter({ text: '🍹 𝓓𝓔𝓐𝓓 - Bot ©', iconURL: CLIENT.user.displayAvatarURL() });
+    .setTitle('✨ Rôle attribué avec succès!')
+    .addFields(
+      { name: '✅ Statut:', value: 'Acceptée', inline: true },
+      { name: '\u200B', value: '\u200B', inline: true },
+      { name: '🏅 Grade:', value: `<@&${roleId}>`, inline: true },
+
+      { name: '👤 Membre:', value: `<@${member.id}>`, inline: true },
+      { name: '\u200B', value: '\u200B', inline: true },
+      { name: '👑 Traité par:', value: `<@${staffMember.id}>`, inline: true }
+    )
+    .setColor('#4CAF50')
+    .setThumbnail(CLIENT.user.displayAvatarURL())
+    .setFooter({ text: '🍹 𝓓𝓔𝓐𝓓 - Bot ©', iconURL: CLIENT.user.displayAvatarURL() })
+    .setTimestamp();
 }
 
+
 /**
- * Creates an embed for role request denial history
+ * Creates an enhanced embed for role denial history with a modern and clean design
  * @param {Object} options The options to configure the history embed
  * @param {string} options.roleId The ID of the role
  * @param {string} options.reason The reason for the denial
  * @param {Object} options.member The user who requested the role
  * @param {Object} options.staffMember The staff member who handled the request
  * @param {Object} options.CLIENT The Discord client instance
- * @returns {EmbedBuilder} The history embed
+ * @returns {EmbedBuilder} The denial history embed
  */
 function createHistoryEmbed({ roleId, reason, member, staffMember, CLIENT }) {
   return new EmbedBuilder()
-    .setTitle('📜 Historique de demande de rôle (Refusée)')
-    .setDescription(`La demande de <@${member.id}> pour le rôle <@&${roleId}> a été **refusée** par <@${staffMember.id}>.`)
+    .setTitle('⚠️ Demande de rôle refusée')
     .addFields(
-      { name: 'Raison:', value: reason || 'Aucune raison fournie' }
+      { name: '❌ Statut:', value: 'Refusée', inline: true },
+      { name: '\u200B', value: '\u200B', inline: true },
+      { name: '🏅 Grade:', value: `<@&${roleId}>`, inline: true },
+
+      { name: '👤 Membre:', value: `<@${member.id}>`, inline: true },
+      { name: '\u200B', value: '\u200B', inline: true },
+      { name: '👑 Traité par:', value: `<@${staffMember.id}>`, inline: true },
+
+      { name: '📜 Raison:', value: reason || 'Aucune raison fournie', inline: false },
     )
-    .setColor('#ff0000') // Couleur rouge pour refus
-    .setTimestamp()
-    .setFooter({ text: '🍹 𝓓𝓔𝓐𝓓 - Bot ©', iconURL: CLIENT.user.displayAvatarURL() });
+    .setColor('#E74C3C')
+    .setThumbnail(CLIENT.user.displayAvatarURL())
+    .setFooter({ text: '🍹 𝓓𝓔𝓐𝓓 - Bot ©', iconURL: CLIENT.user.displayAvatarURL() })
+    .setTimestamp();
 }
+
 
 /**
  * Creates a project information embed with project data

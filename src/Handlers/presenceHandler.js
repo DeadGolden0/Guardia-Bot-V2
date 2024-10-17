@@ -2,8 +2,8 @@ const { ActivityType } = require('discord.js');
 const { PRESENCE } = require('@Config/Config');
 
 /**
- * Met à jour la présence du bot en fonction des serveurs et des membres.
- * @param {Client} client - L'instance du client Discord.
+ * Updates the bot's presence based on servers and members.
+ * @param {Client} client - The Discord client instance.
  */
 function updatePresence(client) {
 

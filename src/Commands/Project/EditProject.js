@@ -3,7 +3,14 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { isProjectMember } = require('@Helpers/Validators');
 const Responses = require('@Config/Responses');
 const logger = require('@Helpers/Logger');
+const { safeFollowUp } = require('@Helpers/Utils');
 
+/**
+ * Edits the project's progress, technical document status, and presentation status, and updates the project info embed.
+ * 
+ * @param {import('discord.js').Interaction} interaction - The interaction object.
+ * @returns {Promise<void>}
+ */
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('editproject')
@@ -21,11 +28,10 @@ module.exports = {
   async execute(interaction) {
     const memberId = interaction.user.id;
 
-    // Utiliser le validateur pour vérifier si l'utilisateur est membre d'un projet actif
+    // Check if the user is a member of an active project
     const { project, isMember } = await isProjectMember(memberId);
-    if (!isMember) { 
-      return interaction.reply({ content: Responses.noProject, ephemeral: true })
-        .then(() => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000)); 
+    if (!isMember) {
+      return safeFollowUp(interaction, { content: Responses.noProject });
     }
 
     const progress = interaction.options.getInteger('progress');
@@ -33,41 +39,41 @@ module.exports = {
     const presentationStatus = interaction.options.getString('presentation_status');
     let isModified = false;
 
-    // Vérifier et modifier le pourcentage de progression
-    if (progress !== null && progress >= 0 && progress <= 100) {
-      project.progress = progress;
-      isModified = true;
-    } else if (progress !== null) {
-      return interaction.reply({ content: Responses.progressInvalid, ephemeral: true })
-        .then(() => deleteAfterDelay(interaction));
+    // Update project progress if valid
+    if (progress !== null) {
+      if (progress >= 0 && progress <= 100) {
+        project.progress = progress;
+        isModified = true;
+      } else {
+        return safeFollowUp(interaction, { content: Responses.progressInvalid });
+      }
     }
 
-    // Vérifier et modifier le statut des documents techniques
+    // Update technical documents status
     if (techDocsStatus) {
       project.techDocsStatus = techDocsStatus;
       isModified = true;
     }
 
-    // Vérifier et modifier le statut du diaporama
+    // Update presentation status
     if (presentationStatus) {
       project.presentationStatus = presentationStatus;
       isModified = true;
     }
 
+    // If no modifications were made
     if (!isModified) {
-      return interaction.reply({ content: 'Aucune modification spécifiée.', ephemeral: true });
+      return safeFollowUp(interaction, { content: 'Aucune modification spécifiée.' });
     }
 
-    // Sauvegarder les modifications dans la base de données
+    // Save project modifications to the database
     await project.save();
 
-    // Utiliser le module pour mettre à jour l'embed d'information
+    // Update the project info embed
     await updateProjectInfoEmbed(project, interaction);
 
-    // Confirmation de la mise à jour
+    // Log the project update and send confirmation
     logger.log(`[EDIT_PROJECT] Le projet ${project.groupeNumber} a été modifié avec succès par ${interaction.user.tag}.`);
-    return interaction.reply({ content: Responses.projectUpdated(project.groupeNumber), ephemeral: true })
-      .then(async () => { setTimeout(() => interaction.deleteReply().catch(() => {}), 5000); 
-    });
+    return safeFollowUp(interaction, { content: Responses.projectUpdated(project.groupeNumber) });
   },
 };

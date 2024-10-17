@@ -1,9 +1,9 @@
 require('module-alias/register');
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const { initializeMongoose } = require("@Database/mongoose");
-const { checkForUpdates } = require('@Helpers/Versioning');
-const loadCommands = require('@Loaders/commandsLoader');
-const loadEvents = require('@Loaders/eventsLoader');
+const { checkForUpdates } = require('@Helpers/Utils');
+const { loadCommands } = require('@Handlers/commandHandler');
+const { loadEvents } = require('@Handlers/eventHandler');
 const { DISCORD_TOKEN } = require('@Config/Config');
 const logger = require('@Helpers/Logger');
 
@@ -32,12 +32,11 @@ async function init() {
     await initializeMongoose();
 
     // Load commands and events
-    loadCommands(client);
-    loadEvents(client);
+    await loadCommands(client);
+    await loadEvents(client);
 
     // Start the Discord bot
     await client.login(DISCORD_TOKEN);
-    logger.log('Discord bot started successfully.');
   } catch (error) {
     logger.error('Error during bot initialization:', error);
     process.exit(1);

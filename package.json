@@ -1,6 +1,6 @@
 {
   "name": "guardia-bot-v2",
-  "version": "1.2.5",
+  "version": "2.1.0",
   "description": "",
   "main": "index.js",
   "scripts": {
@@ -28,7 +28,6 @@
     "@Events": "src/Events",
     "@Helpers": "src/Helpers",
     "@Database": "src/Database",
-    "@Loaders": "src/Loaders",
     "@Handlers": "src/Handlers"
   }
 }

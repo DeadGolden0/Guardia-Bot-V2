@@ -4,7 +4,14 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { EmbedBuilder } = require('discord.js');
 const Responses = require('@Config/Responses');
 const logger = require('@Helpers/Logger');
+const { safeFollowUp } = require('@Helpers/Utils');
 
+/**
+ * Removes a member from the current project if the leader requests it, updates the project embed, and logs the action.
+ * 
+ * @param {import('discord.js').Interaction} interaction - The interaction object.
+ * @returns {Promise<void>}
+ */
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('removemember')
@@ -18,45 +25,43 @@ module.exports = {
     const leaderId = interaction.user.id;
     const member = interaction.options.getUser('member');
 
-    // Utiliser le validateur pour vérifier si l'utilisateur est leader du projet
+    // Check if the user is the leader of the project
     const { project, isLeader } = await isProjectLeader(leaderId);
-    if (!isLeader) { 
-      return interaction.reply({ content: Responses.notLeader, ephemeral: true })
-        .then(() => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000));
+    if (!isLeader) {
+      return safeFollowUp(interaction, { content: Responses.notLeader });
     }
 
-    // Empêcher le leader de se retirer lui-même
-    if (member.id === leaderId) { 
-      return interaction.reply({ content: Responses.leaderSelfRemove, ephemeral: true })
-        .then(() => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000));
+    // Prevent the leader from removing themselves
+    if (member.id === leaderId) {
+      return safeFollowUp(interaction, { content: Responses.leaderSelfRemove });
     }
 
-    // Utiliser le validateur pour vérifier si le membre fait bien partie du projet
+    // Check if the member is part of the project
     const isMember = await isMemberInProject(project._id, member.id);
     if (!isMember) {
-      return interaction.reply({ content: Responses.memberNotFound(member), ephemeral: true })
-        .then(() => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000));
+      return safeFollowUp(interaction, { content: Responses.memberNotFound(member) });
     }
-    
-    // Retirer le rôle si présent dans Discord
-    const guildMember = await interaction.guild.members.fetch(member.id);
-    if (guildMember.roles.cache.has(project.roleId)) { await guildMember.roles.remove(project.roleId); }
 
-    // Retirer le membre de memberIds
+    // Remove the member's project role from Discord if they have it
+    const guildMember = await interaction.guild.members.fetch(member.id);
+    if (guildMember.roles.cache.has(project.roleId)) {
+      await guildMember.roles.remove(project.roleId);
+    }
+
+    // Remove the member from the project in the database
     project.memberIds = project.memberIds.filter(id => id !== member.id);
     await project.save();
 
-    // Utiliser le module pour mettre à jour l'embed d'information
+    // Update the project info embed
     await updateProjectInfoEmbed(project, interaction);
 
-    // Récupérer le channel de discussion
+    // Get the project's discussion channel
     const textChannel = interaction.guild.channels.cache.get(project.textChannelId);
-    if (!textChannel) { 
-      return interaction.reply({ content: Responses.simpleError, ephemeral: true })
-        .then(() => setTimeout(() => interaction.deleteReply().catch(() => {}), 5000));
+    if (!textChannel) {
+      return safeFollowUp(interaction, { content: Responses.simpleError });
     }
 
-    // Créer un embed pour notifier le retrait du membre
+    // Create an embed to notify the removal of the member
     const embed = new EmbedBuilder()
       .setTitle('👤 Membre retiré du projet')
       .setDescription(`<@${leaderId}> a retiré <@${member.id}> du groupe de projet numéro **${project.groupeNumber}**.`)
@@ -64,11 +69,13 @@ module.exports = {
       .setTimestamp()
       .setFooter({ text: '🍹 𝓓𝓔𝓐𝓓 - Bot ©', iconURL: interaction.client.user.displayAvatarURL() });
 
-    // Envoyer l'embed dans le channel de discussion du projet
+    // Send the embed to the project's discussion channel
     await textChannel.send({ embeds: [embed] });
 
-    // Confirmation du retrait du membre
+    // Log the removal action
     logger.log(`[REMOVE] Le membre ${member.tag} a été retiré du groupe de projet numéro ${project.groupeNumber} avec succès.`);
-    return interaction.reply({ content: Responses.memberRemoved(member, project.groupeNumber), ephemeral: true });
+
+    // Confirm the member removal to the leader
+    return safeFollowUp(interaction, { content: Responses.memberRemoved(member, project.groupeNumber) });
   },
 };

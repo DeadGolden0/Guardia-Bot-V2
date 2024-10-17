@@ -16,7 +16,7 @@ module.exports = {
   memberAlreadyInProject: (memberTag) => `**${memberTag}** fait déjà partie de ce projet.`,
   notLeader: `Oops! il semblerait que vous n'êtes pas le leader d'un groupe de projet.`,
   leaderSelfRemove: `Vous ne pouvez pas vous retirer vous-même du projet.`,
-  leaderCannotLeave: `Le leader du projet ne peut pas quitter le projet. Utilisez la commande /endproject pour mettre fin au projet.`,
+  leaderCannotLeave: "Le leader du projet ne peut pas quitter le projet. Utilisez la commande ``/endproject`` pour mettre fin au projet.",
 
   // ----- Project Success -----
   projectCreated: (groupNumber) => `Le projet **numéro ${groupNumber}** a été créé avec succès.`,
