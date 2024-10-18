@@ -3,6 +3,7 @@ const { updateProjectInfoEmbed } = require('@Helpers/updateEmbed');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { safeFollowUp } = require('@Helpers/Message');
 const { EmbedBuilder } = require('discord.js');
+const { PROJECTS } = require('@Config/Config');
 const Responses = require('@Config/Responses');
 const logger = require('@Helpers/Logger');
 
@@ -22,6 +23,11 @@ module.exports = {
         .setRequired(true)),
 
   async execute(interaction) {
+    if (!PROJECTS.ENABLED) {
+      return safeFollowUp(interaction, { content: Responses.projectsDisabled });
+    }
+
+
     const leaderId = interaction.user.id;
     const member = interaction.options.getUser('member');
 

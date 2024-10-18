@@ -1,4 +1,5 @@
 const { handleRequest, handleAccept, handleDeny } = require('@Handlers/roleRequestButton');
+const { handleSuggestionInteraction } = require('@Handlers/suggestionHandler');
 const { handleDenyModal  } = require('@Handlers/roleRequestModal');
 const { handleEndProject  } = require('@Handlers/projectButton');
 const commandExecutor = require('@Handlers/commandExecutor');
@@ -59,6 +60,11 @@ module.exports = async (client, interaction) => {
         case 'PROJECT_CONFIRM':
         case 'PROJECT_CANCEL':
           await handleEndProject(interaction, action);
+          break;
+
+        case 'POLL_YES':
+        case 'POLL_NO':
+          await handleSuggestionInteraction(interaction);
           break;
       
         default:

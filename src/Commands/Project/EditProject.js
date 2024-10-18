@@ -2,6 +2,7 @@ const { updateProjectInfoEmbed } = require('@Helpers/updateEmbed');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { isProjectMember } = require('@Helpers/Validators');
 const { safeFollowUp } = require('@Helpers/Message');
+const { PROJECTS } = require('@Config/Config');
 const Responses = require('@Config/Responses');
 const logger = require('@Helpers/Logger');
 
@@ -26,6 +27,10 @@ module.exports = {
         .setDescription('Modifier le statut du diaporama (En cours, Terminé, etc.)')),
 
   async execute(interaction) {
+    if (!PROJECTS.ENABLED) {
+      return safeFollowUp(interaction, { content: Responses.projectsDisabled });
+    }
+
     const memberId = interaction.user.id;
 
     // Check if the user is a member of an active project

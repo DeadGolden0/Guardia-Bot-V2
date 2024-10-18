@@ -1,6 +1,7 @@
 const { isProjectLeader } = require('@Helpers/Validators');
 const { safeReply } = require('@Helpers/Message');
 const Responses = require('@Config/Responses');
+const { PROJECTS } = require('@Config/Config');
 const logger = require('@Helpers/Logger');
 
 /**
@@ -10,6 +11,8 @@ const logger = require('@Helpers/Logger');
  * @returns {Promise<void>}
  */
 async function handleEndProject(interaction, action) {
+  if (!PROJECTS.ENABLED) return;
+  
   const leaderId = interaction.user.id;
 
   // Check if the user is the leader of the project
@@ -30,10 +33,14 @@ async function handleEndProject(interaction, action) {
       if (role) await role.delete();
     }
 
-    // Update project status
-    project.status = 'terminated';
-    project.confirmationPending = false;
-    await project.save();
+    // After handling the action, delete the confirmation message
+    if (PROJECTS.DELETE) {
+      // Remove the project from the database
+      await project.deleteOne();
+    } else {
+      // Update project status
+      await project.updateOne({ status: 'terminated', confirmationPending: false });
+    }
 
     logger.log(`[END_PROJECT] Le groupe de projet numéro ${project.groupeNumber} a été supprimé avec succès.`);
 

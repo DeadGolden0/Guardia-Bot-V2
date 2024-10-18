@@ -4,6 +4,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { createProjectInfoEmbed } = require('@Helpers/Embed');
 const { getDaysUntilNextFriday } = require('@Helpers/Utils');
 const { safeFollowUp } = require('@Helpers/Message');
+const { PROJECTS } = require('@Config/Config');
 const Project = require('@Database/schemas/Project');
 const Responses = require('@Config/Responses');
 const logger = require('@Helpers/Logger');
@@ -24,6 +25,10 @@ module.exports = {
         .setRequired(true)),
 
   async execute(interaction) {
+    if (!PROJECTS.ENABLED) {
+      return safeFollowUp(interaction, { content: Responses.projectsDisabled });
+    }
+
     const groupeNumber = interaction.options.getInteger('groupe_number');
     const leaderId = interaction.user.id;
 

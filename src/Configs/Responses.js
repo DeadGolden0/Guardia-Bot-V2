@@ -1,4 +1,5 @@
 module.exports = {
+  projectsDisabled: `Le module de projet est actuellement désactivé. Veuillez contacter un administrateur pour plus d'informations.`,
   // ----- Project Errors -----
   alreadyHasProject: (groupNumber) => `Vous avez déjà un projet en cours avec le groupe numéro **${groupNumber}**. Vous devez terminer ce projet avant d'en créer un nouveau.`,
   groupExists: (groupNumber) => `Le groupe de projet numéro **${groupNumber}** existe déjà. Veuillez choisir un autre numéro de groupe.`,

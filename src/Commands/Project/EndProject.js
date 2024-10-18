@@ -2,6 +2,7 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { isProjectLeader } = require('@Helpers/Validators');
 const { safeFollowUp } = require('@Helpers/Message');
+const { PROJECTS } = require('@Config/Config');
 const Responses = require('@Config/Responses');
 const logger = require('@Helpers/Logger');
 
@@ -17,6 +18,10 @@ module.exports = {
     .setDescription('Met fin à votre projet actuel en supprimant les channels et rôles associés. (Lead groupe uniquement)'),
 
   async execute(interaction) {
+    if (!PROJECTS.ENABLED) {
+      return safeFollowUp(interaction, { content: Responses.projectsDisabled });
+    }
+
     const leaderId = interaction.user.id;
 
     // Check if the user is the leader of the project

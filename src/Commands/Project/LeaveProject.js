@@ -2,8 +2,9 @@ const { updateProjectInfoEmbed } = require('@Helpers/updateEmbed');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { isProjectMember } = require('@Helpers/Validators');
 const { safeFollowUp } = require('@Helpers/Message');
-const Responses = require('@Config/Responses');
+const { PROJECTS } = require('@Config/Config');
 const { EmbedBuilder } = require('discord.js');
+const Responses = require('@Config/Responses');
 const logger = require('@Helpers/Logger');
 
 /**
@@ -18,6 +19,10 @@ module.exports = {
     .setDescription('Quitter le projet actuel. (Tous les membres sauf le leader)'),
 
   async execute(interaction) {
+    if (!PROJECTS.ENABLED) {
+      return safeFollowUp(interaction, { content: Responses.projectsDisabled });
+    }
+
     const userId = interaction.user.id;
 
     // Check if the user is a member of an active project

@@ -33,4 +33,21 @@ module.exports = {
     // Your bot status message
     MESSAGE: "Surveille {members} membres sur {servers} serveurs",
   },
+
+  // MODULES
+
+  // Configuration for the project module
+  PROJECTS : {
+    // Whether or not the project module is enabled
+    ENABLED: true,
+
+    // Delete MongoDB documents after ending the project
+    DELETE: true,
+  },
+
+  // Configuration for the suggestion module
+  SUGGESTIONS: {
+    // Whether or not the suggestion module is enabled
+    ENABLED: true,
+  },
 };
