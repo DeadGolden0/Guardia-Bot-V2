@@ -14,7 +14,7 @@ const logger = require('@Helpers/Logger');
  */
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('editproject')
+    .setName('edit-project')
     .setDescription('Modifier la progression, le statut des documents techniques ou le statut du diaporama.')
     .addIntegerOption(option => 
       option.setName('progress')

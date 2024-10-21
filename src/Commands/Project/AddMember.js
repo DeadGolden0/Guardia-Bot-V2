@@ -15,7 +15,7 @@ const logger = require('@Helpers/Logger');
  */
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('addmember')
+    .setName('add-member')
     .setDescription('Ajouter un membre au projet actuel.')
     .addUserOption(option => 
       option.setName('member')

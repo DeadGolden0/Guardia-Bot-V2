@@ -15,7 +15,7 @@ const logger = require('@Helpers/Logger');
  */
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('kickmember')
+    .setName('kick-member')
     .setDescription('Retirer un membre du projet actuel. (Lead groupe uniquement)')
     .addUserOption(option => 
       option.setName('member')

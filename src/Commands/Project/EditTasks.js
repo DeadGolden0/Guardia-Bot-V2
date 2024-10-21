@@ -15,7 +15,7 @@ const logger = require('@Helpers/Logger');
  */
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('edittasks')
+    .setName('edit-tasks')
     .setDescription('Modifier les tâches assignées aux membres du projet. (Lead groupe uniquement)')
     .addUserOption(option =>
       option.setName('task_member')

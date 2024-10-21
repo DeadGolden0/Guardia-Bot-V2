@@ -21,7 +21,7 @@ const logger = require('@Helpers/Logger');
  */
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('listprojects')
+    .setName('list-projects')
     .setDescription('Liste tous les projets actifs sur le serveur. (ADMIN ONLY)')
     .setDefaultMemberPermissions(PermissionsBitField.Flags.Administrator),
 

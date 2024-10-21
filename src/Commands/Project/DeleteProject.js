@@ -19,7 +19,7 @@ const logger = require('@Helpers/Logger');
  */
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('deleteproject')
+    .setName('delete-project')
     .setDescription('Supprime un projet actif par son numéro de groupe. (ADMIN ONLY)')
     .setDefaultMemberPermissions(PermissionsBitField.Flags.Administrator)
     .addIntegerOption(option =>

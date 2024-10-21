@@ -17,7 +17,7 @@ const logger = require('@Helpers/Logger');
  */
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('startproject')
+    .setName('start-project')
     .setDescription('Démarre un nouveau projet avec un numéro de groupe unique.')
     .addIntegerOption(option => 
       option.setName('groupe_number')

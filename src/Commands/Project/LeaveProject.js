@@ -15,7 +15,7 @@ const logger = require('@Helpers/Logger');
  */
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('leaveproject')
+    .setName('leave-project')
     .setDescription('Quitter le projet actuel. (Tous les membres sauf le leader)'),
 
   async execute(interaction) {

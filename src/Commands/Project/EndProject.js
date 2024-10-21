@@ -14,7 +14,7 @@ const logger = require('@Helpers/Logger');
  */
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('endproject')
+    .setName('end-project')
     .setDescription('Met fin à votre projet actuel en supprimant les channels et rôles associés. (Lead groupe uniquement)'),
 
   async execute(interaction) {
