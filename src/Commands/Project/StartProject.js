@@ -80,11 +80,18 @@ module.exports = {
         },
         {
           id: groupRole, // Groupe
-          allow: [PermissionsBitField.Flags.ViewChannel],
+          allow: [
+            PermissionsBitField.Flags.ViewChannel, // View channel
+            PermissionsBitField.Flags.ManageMessages // Allows pinning messages
+          ],
         },
         {
           id: leaderRole, // Leader
-          allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.ManageChannels],
+          allow: [
+            PermissionsBitField.Flags.ViewChannel, // View channel
+            PermissionsBitField.Flags.ManageChannels, // Allows to create channels
+            PermissionsBitField.Flags.ManageMessages  // Allows pinning messages
+          ],
         },
       ],
     });
@@ -107,8 +114,8 @@ module.exports = {
         parent: category.id,
         permissionOverwrites: [
           { id: interaction.guild.id, deny: [PermissionsBitField.Flags.ViewChannel] },
-          { id: groupRole, allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages] },
-          { id: leaderRole, allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages] },
+          { id: groupRole, allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ManageMessages] },
+          { id: leaderRole, allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ManageMessages] },
         ],
       }),
       interaction.guild.channels.create({
@@ -117,8 +124,8 @@ module.exports = {
         parent: category.id,
         permissionOverwrites: [
           { id: interaction.guild.id, deny: [PermissionsBitField.Flags.ViewChannel] },
-          { id: groupRole, allow: [PermissionsBitField.Flags.ViewChannel] },
-          { id: leaderRole, allow: [PermissionsBitField.Flags.ViewChannel] },
+          { id: groupRole, allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.Connect] },
+          { id: leaderRole, allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.Connect] },
         ],
       }),
     ]);
