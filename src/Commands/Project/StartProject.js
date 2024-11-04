@@ -181,7 +181,6 @@ module.exports = {
       memberIds: [leaderId],
       roleId: groupRole.id,
       leaderRoleId: leaderRole.id,
-      categoryId: category.id,
       channelIds: [
         { id: channels[0].id, type: 'info' },
         { id: channels[1].id, type: 'discussion' },

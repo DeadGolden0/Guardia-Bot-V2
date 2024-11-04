@@ -12,7 +12,6 @@ const projectSchema = new mongoose.Schema({
   leaderRoleId: { type: String, required: true },
   
   // Channel information
-  categoryId: { type: String, required: true },
   channelIds: {
     type: [{
       id: { type: String, required: true },
