@@ -89,7 +89,6 @@ module.exports = {
           id: leaderRole, // Leader
           allow: [
             PermissionsBitField.Flags.ViewChannel, // View channel
-            PermissionsBitField.Flags.ManageChannels, // Allows to create channels
             PermissionsBitField.Flags.ManageMessages  // Allows pinning messages
           ],
         },
@@ -97,7 +96,7 @@ module.exports = {
     });
 
     // Create channels in the project category
-    const [infoChannel, textChannel, voiceChannel] = await Promise.all([
+    const channels = await Promise.all([
       interaction.guild.channels.create({
         name: `✨┇ɪɴꜰᴏ-ᴘʀᴏᴊᴇᴛ`,
         type: ChannelType.GuildText,
@@ -110,6 +109,16 @@ module.exports = {
       }),
       interaction.guild.channels.create({
         name: `💬┇ᴅɪꜱᴄᴜꜱꜱɪᴏɴ`,
+        type: ChannelType.GuildText,
+        parent: category.id,
+        permissionOverwrites: [
+          { id: interaction.guild.id, deny: [PermissionsBitField.Flags.ViewChannel] },
+          { id: groupRole, allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ManageMessages] },
+          { id: leaderRole, allow: [PermissionsBitField.Flags.ViewChannel, PermissionsBitField.Flags.SendMessages, PermissionsBitField.Flags.ManageMessages] },
+        ],
+      }),
+      interaction.guild.channels.create({
+        name: `📜┇ᴅᴏᴄᴜᴍᴇɴᴛꜱ`,
         type: ChannelType.GuildText,
         parent: category.id,
         permissionOverwrites: [
@@ -148,7 +157,22 @@ module.exports = {
     });
 
     // Send the info embed to the info channel
-    await infoChannel.send({ embeds: [infoEmbed] });
+    await channels[0].send({ embeds: [infoEmbed] });
+
+    // Envoyer un message de bienvenue dans le channel de discussion
+    await channels[1].send({
+      content: `Bienvenue dans le projet **Groupe ${groupeNumber}** ! 🎉\n\n` +
+           `<@${leaderId}> est le leader de ce projet.\n\n` +
+           `Voici quelques commandes utiles pour gérer votre projet :\n` +
+           `- **/add-member** : Ajouter un membre au projet.\n` +
+           `- **/kick-member** : Retirer un membre du projet.\n` +
+           `- **/leave-project** : Permet à un membre de quitter le projet.\n` +
+           `- **/add-channel** : Ajouter un canal texte ou vocal.\n` +
+           `- **/edit-project** : Modifier les informations du projet en cours.\n` +
+           `- **/edit-tasks** : Modifier les tâches des membres.\n` +
+           `- **/end-project** : Mettre fin au projet.\n\n` +
+           `Utilisez ces commandes pour organiser et gérer votre projet de manière efficace. Bonne chance ! 🚀`
+    });
 
     // Save project information to the database
     const project = new Project({
@@ -158,9 +182,13 @@ module.exports = {
       roleId: groupRole.id,
       leaderRoleId: leaderRole.id,
       categoryId: category.id,
-      textChannelId: textChannel.id,
-      voiceChannelId: voiceChannel.id,
-      infoChannelId: infoChannel.id,
+      channelIds: [
+        { id: channels[0].id, type: 'info' },
+        { id: channels[1].id, type: 'discussion' },
+        { id: channels[2].id, type: 'documents' },
+        { id: channels[3].id, type: 'voice' },
+        { id: category.id, type: 'category' },
+      ],
       daysUntilFriday: daysUntilFriday,
       status: 'active',
     });

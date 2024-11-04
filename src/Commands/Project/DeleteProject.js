@@ -38,18 +38,14 @@ module.exports = {
     }
 
     // Supprimer les canaux et les rôles associés au projet
-    const channels = ['textChannelId', 'infoChannelId', 'voiceChannelId', 'categoryId'].map(id => interaction.guild.channels.cache.get(project[id]));
+    const channels = project.channelIds.map(channelInfo => interaction.guild.channels.cache.get(channelInfo.id));
     for (const channel of channels) {
-      if (channel) {
-        await channel.delete();
-      }
+      if (channel) await channel.delete();
     }
 
     const roles = ['roleId', 'leaderRoleId'].map(id => interaction.guild.roles.cache.get(project[id]));
     for (const role of roles) {
-      if (role) {
-        await role.delete();
-      }
+      if (role) await role.delete();
     }
 
     // Supprimer le projet de la base de données

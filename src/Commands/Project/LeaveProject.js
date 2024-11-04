@@ -1,5 +1,6 @@
 const { updateProjectInfoEmbed } = require('@Helpers/updateEmbed');
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const { getChannelByType } = require('@Helpers/getChannels');
 const { isProjectMember } = require('@Helpers/Validators');
 const { safeFollowUp } = require('@Helpers/Message');
 const { PROJECTS } = require('@Config/Config');
@@ -50,7 +51,7 @@ module.exports = {
     await updateProjectInfoEmbed(project, interaction);
 
     // Retrieve the project's discussion channel
-    const textChannel = interaction.guild.channels.cache.get(project.textChannelId);
+    const textChannel = getChannelByType(project, 'discussion', interaction.guild);
     if (!textChannel) {
       return safeFollowUp(interaction, { content: Responses.simpleError });
     }

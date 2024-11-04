@@ -37,7 +37,6 @@ module.exports = {
     }
 
     const suggestionChannel = interaction.guild.channels.cache.get(config.suggestionChannelId);
-
     if (!suggestionChannel) {
       return safeFollowUp(interaction, { content: 'Le canal de suggestions configuré est introuvable. Veuillez vérifier la configuration.', ephemeral: true });
     }

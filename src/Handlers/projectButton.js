@@ -23,7 +23,7 @@ async function handleEndProject(interaction, action) {
 
   if (action === 'PROJECT_CONFIRM') {
     // Delete project channels and roles
-    const channels = ['textChannelId', 'infoChannelId', 'voiceChannelId', 'categoryId'].map(id => interaction.guild.channels.cache.get(project[id]));
+    const channels = project.channelIds.map(channelInfo => interaction.guild.channels.cache.get(channelInfo.id));
     for (const channel of channels) {
       if (channel) await channel.delete();
     }

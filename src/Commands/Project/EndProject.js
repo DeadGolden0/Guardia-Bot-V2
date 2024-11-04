@@ -1,5 +1,6 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } = require('discord.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const { getChannelByType } = require('@Helpers/getChannels');
 const { isProjectLeader } = require('@Helpers/Validators');
 const { safeFollowUp } = require('@Helpers/Message');
 const { PROJECTS } = require('@Config/Config');
@@ -40,7 +41,7 @@ module.exports = {
     await project.save();
 
     // Get the project's text channel
-    const textChannel = interaction.guild.channels.cache.get(project.textChannelId);
+    const textChannel = getChannelByType(project, 'discussion', interaction.guild);
     if (!textChannel) {
       return safeFollowUp(interaction, { content: Responses.simpleError });
     }

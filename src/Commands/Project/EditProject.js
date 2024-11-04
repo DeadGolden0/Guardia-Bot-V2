@@ -32,7 +32,6 @@ module.exports = {
     }
 
     const memberId = interaction.user.id;
-
     // Check if the user is a member of an active project
     const { project, isMember } = await isProjectMember(memberId);
     if (!isMember) {

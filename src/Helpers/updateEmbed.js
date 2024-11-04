@@ -1,4 +1,5 @@
 const { createProjectInfoEmbed } = require('@Helpers/Embed');
+const { getChannelByType } = require('@Helpers/getChannels');
 const Responses = require('@Config/Responses');
 const logger = require('@Helpers/Logger');
 
@@ -11,7 +12,7 @@ const logger = require('@Helpers/Logger');
 async function updateProjectInfoEmbed(project, interaction) {
   try {
     // Récupérer le channel d'information
-    const infoChannel = interaction.guild.channels.cache.get(project.infoChannelId);
+    const infoChannel = getChannelByType(project, 'info', interaction.guild);
     if (!infoChannel) { return interaction.reply({ content: Responses.errors.infoChannelNotFound, ephemeral: true }); }
 
     // Récupérer le message contenant l'embed d'information
