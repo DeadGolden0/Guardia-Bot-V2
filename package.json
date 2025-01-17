@@ -15,7 +15,7 @@
     "discord.js": "^14.16.3",
     "dotenv": "^16.4.5",
     "module-alias": "^2.2.3",
-    "mongoose": "^8.8.3",
+    "mongoose": "^8.9.5",
     "picocolors": "^1.1.0"
   },
   "_moduleAliases": {
