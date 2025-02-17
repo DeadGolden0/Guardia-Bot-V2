@@ -7,6 +7,4 @@ services:
     environment:
       - DISCORD_TOKEN=${DISCORD_TOKEN}
       - MONGO_URI=${MONGO_URI}
-    volumes:
-      - .:/usr/src/bot
     restart: unless-stopped

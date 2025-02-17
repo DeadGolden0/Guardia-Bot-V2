@@ -2,17 +2,16 @@
 FROM node:latest
 
 # Définir le répertoire de travail dans le conteneur
-RUN mkdir -p /usr/src/bot
-WORKDIR /usr/src/bot
+WORKDIR /bot
 
 # Copier les fichiers package.json et package-lock.json
-COPY package*.json /usr/src/bot
+COPY package*.json ./
 
 # Installer les dépendances
 RUN npm install
 
 # Copier le reste des fichiers de l'application
-COPY . /usr/src/bot
+COPY . .
 
 # Commande pour démarrer l'application
 CMD ["node", "index.js"]
