@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Exposer le port que l'application utilise
-EXPOSE 3000
+EXPOSE 3009
 
 # Commande pour démarrer l'application
 CMD ["node", "index.js"]
