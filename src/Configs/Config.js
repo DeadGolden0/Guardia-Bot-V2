@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 // Export configuration settings
 module.exports = {
   // Log level for the logger (DEBUG, INFO, WARN, ERROR)
