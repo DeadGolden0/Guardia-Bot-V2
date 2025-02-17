@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  bot:
+    build: .
+    container_name: guardia-bot
+    environment:
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - CLIENT_ID=${CLIENT_ID}
+      - GUILD_ID=${GUILD_ID}
+      - MONGO_URI=${MONGO_URI}
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
