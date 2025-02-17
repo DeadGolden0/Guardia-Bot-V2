@@ -1,5 +1,5 @@
 # Utiliser une image Node.js officielle comme image de base
-FROM node:16
+FROM node:18
 
 # Définir le répertoire de travail dans le conteneur
 WORKDIR /usr/src/app
@@ -12,9 +12,6 @@ RUN npm install
 
 # Copier le reste des fichiers de l'application
 COPY . .
-
-# Exposer le port que l'application utilise
-EXPOSE 3009
 
 # Commande pour démarrer l'application
 CMD ["node", "index.js"]

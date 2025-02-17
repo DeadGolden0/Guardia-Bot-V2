@@ -9,6 +9,4 @@ services:
       - MONGO_URI=${MONGO_URI}
     volumes:
       - .:/usr/src/app
-    ports:
-      - "3009:3009"
     restart: unless-stopped
