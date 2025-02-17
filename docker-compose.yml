@@ -8,5 +8,5 @@ services:
       - DISCORD_TOKEN=${DISCORD_TOKEN}
       - MONGO_URI=${MONGO_URI}
     volumes:
-      - .:/usr/src/app
+      - .:/usr/src/bot
     restart: unless-stopped
