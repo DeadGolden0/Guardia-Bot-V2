@@ -7,4 +7,4 @@ services:
     environment:
       - DISCORD_TOKEN=${DISCORD_TOKEN}
       - MONGO_URI=${MONGO_URI}
-    restart: unless-stopped
+    env_file: ".env"
